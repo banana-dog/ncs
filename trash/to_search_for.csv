@@ -1,0 +1,51 @@
+strvis__,"int strvis(undefined2 *param_1,char *param_2,uint param_3)
+
+{
+  char *pcVar1;
+  char cVar2;
+  undefined2 *puVar3;
+  
+  cVar2 = *param_2;
+  puVar3 = param_1;
+  if (cVar2 == '\0') {
+    *(undefined *)param_1 = 0;
+    return 0;
+  }
+  do {
+    pcVar1 = param_2 + 1;
+    param_2 = param_2 + 1;
+    puVar3 = vis(puVar3,(int)cVar2,param_3,*pcVar1);
+    cVar2 = *param_2;
+  } while (cVar2 != '\0');
+  *(undefined *)puVar3 = 0;
+  return (int)puVar3 - (int)param_1;
+}"
+1,"void alerts_ring_bell(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                     undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
+                     long param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
+                     undefined8 param_13,undefined8 param_14)
+
+{
+  long *plVar1;
+  undefined8 extraout_RDX;
+  long lVar2;
+  
+  lVar2 = clients;
+  if (clients != 0) {
+    do {
+      while ((*(long *)(lVar2 + 0x598) != param_9 || ((*(byte *)(lVar2 + 0x421) & 0x20) != 0))) {
+        plVar1 = (long *)(lVar2 + 0x5c0);
+        lVar2 = *plVar1;
+        if (*plVar1 == 0) {
+          return;
+        }
+      }
+      param_1 = tty_putcode(param_1,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+                            lVar2 + 0xe0,3,param_11,param_12,param_13,param_14);
+      plVar1 = (long *)(lVar2 + 0x5c0);
+      param_11 = extraout_RDX;
+      lVar2 = *plVar1;
+    } while (*plVar1 != 0);
+  }
+  return;
+}"
