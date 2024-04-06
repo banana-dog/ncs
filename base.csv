@@ -1,63 +1,939 @@
-strvisx,"int
-strvisx(char *dst, const char *src, size_t len, int flag)
+./repos/tmate/tmate-msg.c,"static void tmate_status_message_client(struct client *c, const char *message)
 {
-	char c;
-	char *start;
+	struct timeval		 tv;
+	struct message_entry	*msg, *msg1;
+	int			 delay;
+	u_int			 limit;
 
-	for (start = dst; len > 1; len--) {
-		c = *src;
-		dst = vis(dst, c, flag, *++src);
+	limit = options_get_number(global_options, ""message-limit"");
+	delay = options_get_number(c->session ? c->session->options : global_s_options,
+				   ""tmate-display-time"");
+
+	status_prompt_clear(c);
+	status_message_clear(c);
+
+	xasprintf(&c->message_string, ""[tmate] %s"", message);
+
+	msg = xcalloc(1, sizeof *msg);
+	msg->msg_time = time(NULL);
+	msg->msg_num = c->message_next++;
+	msg->msg = xstrdup(c->message_string);
+	TAILQ_INSERT_TAIL(&c->message_log, msg, entry);
+
+	TAILQ_FOREACH_SAFE(msg, &c->message_log, entry, msg1) {
+		if (msg->msg_num + limit >= c->message_next)
+			break;
+		free(msg->msg);
+		TAILQ_REMOVE(&c->message_log, msg, entry);
+		free(msg);
 	}
-	if (len)
-		dst = vis(dst, *src, flag, '\0');
-	*dst = '\0';
-	return (dst - start);
-}"
-stravis,"int
-stravis(char **outp, const char *src, int flag)
-{
-	char *buf;
-	int len, serrno;
 
-	buf = calloc(4, strlen(src) + 1);
-	if (buf == NULL)
-		return -1;
-	len = strvis(buf, src, flag);
-	serrno = errno;
-	*outp = realloc(buf, len + 1);
-	if (*outp == NULL) {
-		*outp = buf;
-		errno = serrno;
+	if (delay > 0) {
+		tv.tv_sec = delay / 1000;
+		tv.tv_usec = (delay % 1000) * 1000L;
+
+		if (event_initialized(&c->message_timer))
+			evtimer_del(&c->message_timer);
+		evtimer_set(&c->message_timer, status_message_callback, c);
+		evtimer_add(&c->message_timer, &tv);
 	}
-	return (len);
-}"
-strvis_orig,"int
-strvis(char *dst, const char *src, int flag)
-{
-	char c;
-	char *start;
 
-	for (start = dst; (c = *src);)
-		dst = vis(dst, c, flag, *++src);
-	*dst = '\0';
-	return (dst - start);
+	c->flags |= CLIENT_STATUS | CLIENT_FORCE_STATUS;
+
+	recalculate_sizes();
 }"
-3,"int
+./repos/tmate/tmate-msg.c,"static void tmate_status_message_session(const char *message)
+{
+	if (tmate_foreground)
+		return;
+
+	struct session *s;
+	s = RB_MIN(sessions, &sessions);
+	if (!s) {
+		cfg_add_cause(""%s"", message);
+		return;
+	}
+
+	struct window_pane *wp;
+	wp = s->curw->window->active;
+	if (wp->mode == &window_copy_mode)
+		window_copy_add(wp, ""%s"", message);
+}"
+./repos/tmate/tmate-msg.c,"void __tmate_status_message(const char *fmt, va_list ap)
+{
+	struct client *c;
+	char *message;
+
+	xvasprintf(&message, fmt, ap);
+	tmate_info(""%s"", message);
+
+	TAILQ_FOREACH(c, &clients, entry) {
+		if (c && !(c->flags & CLIENT_READONLY))
+			tmate_status_message_client(c, message);
+	}
+
+	tmate_status_message_session(message);
+
+	free(message);
+}"
+./repos/tmate/tmate-msg.c,"void tmate_status_message(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	__tmate_status_message(fmt, ap);
+	va_end(ap);
+}"
+./repos/tmate/cmd-queue.c,"struct cmd_q *
+cmdq_new(struct client *c)
+{
+	struct cmd_q	*cmdq;
+
+	cmdq = xcalloc(1, sizeof *cmdq);
+	cmdq->references = 1;
+	cmdq->flags = 0;
+
+	cmdq->client = c;
+	cmdq->client_exit = -1;
+
+	TAILQ_INIT(&cmdq->queue);
+	cmdq->item = NULL;
+	cmdq->cmd = NULL;
+
+	cmd_find_clear_state(&cmdq->current, NULL, 0);
+	cmdq->parent = NULL;
+
+	return (cmdq);
+}"
+./repos/tmate/cmd-queue.c,"int
+cmdq_free(struct cmd_q *cmdq)
+{
+	if (--cmdq->references != 0) {
+		if (cmdq->flags & CMD_Q_DEAD)
+			return (1);
+		return (0);
+	}
+
+	cmdq_flush(cmdq);
+	free(cmdq);
+	return (1);
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_print(struct cmd_q *cmdq, const char *fmt, ...)
+{
+	struct client	*c = cmdq->client;
+	struct window	*w;
+	va_list		 ap;
+	char		*tmp, *msg;
+
+	va_start(ap, fmt);
+
+	if (c == NULL)
+		/* nothing */;
+	else if (c->session == NULL || (c->flags & CLIENT_CONTROL)) {
+		if (~c->flags & CLIENT_UTF8) {
+			vasprintf(&tmp, fmt, ap);
+			msg = utf8_sanitize(tmp);
+			free(tmp);
+			evbuffer_add(c->stdout_data, msg, strlen(msg));
+			free(msg);
+		} else
+			evbuffer_add_vprintf(c->stdout_data, fmt, ap);
+		evbuffer_add(c->stdout_data, ""\n"", 1);
+		server_client_push_stdout(c);
+	} else {
+		w = c->session->curw->window;
+		if (w->active->mode != &window_copy_mode) {
+			window_pane_reset_mode(w->active);
+			window_pane_set_mode(w->active, &window_copy_mode);
+			window_copy_init_for_output(w->active);
+#ifdef TMATE
+			tmate_sync_copy_mode(w->active);
+#endif
+		}
+		window_copy_vadd(w->active, fmt, ap);
+	}
+
+	va_end(ap);
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_error(struct cmd_q *cmdq, const char *fmt, ...)
+{
+	struct client	*c = cmdq->client;
+	struct cmd	*cmd = cmdq->cmd;
+	va_list		 ap;
+	char		*msg;
+	size_t		 msglen;
+	char		*tmp;
+
+	va_start(ap, fmt);
+	msglen = xvasprintf(&msg, fmt, ap);
+	va_end(ap);
+
+	if (c == NULL)
+#ifdef TMATE
+		if (cmd->file && cmd->line)
+			cfg_add_cause(""%s:%u: %s"", cmd->file, cmd->line, msg);
+		else
+			cfg_add_cause(""%s"", msg);
+#else
+		cfg_add_cause(""%s:%u: %s"", cmd->file, cmd->line, msg);
+#endif
+	else if (c->session == NULL || (c->flags & CLIENT_CONTROL)) {
+		if (~c->flags & CLIENT_UTF8) {
+			tmp = msg;
+			msg = utf8_sanitize(tmp);
+			free(tmp);
+			msglen = strlen(msg);
+		}
+		evbuffer_add(c->stderr_data, msg, msglen);
+		evbuffer_add(c->stderr_data, ""\n"", 1);
+		server_client_push_stderr(c);
+		c->retval = 1;
+	} else {
+		*msg = toupper((u_char) *msg);
+		status_message_set(c, ""%s"", msg);
+	}
+
+	free(msg);
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_guard(struct cmd_q *cmdq, const char *guard, int flags)
+{
+	struct client	*c = cmdq->client;
+
+	if (c == NULL || !(c->flags & CLIENT_CONTROL))
+		return;
+
+	evbuffer_add_printf(c->stdout_data, ""%%%s %ld %u %d\n"", guard,
+	    (long) cmdq->time, cmdq->number, flags);
+	server_client_push_stdout(c);
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_run(struct cmd_q *cmdq, struct cmd_list *cmdlist, struct mouse_event *m)
+{
+	cmdq_append(cmdq, cmdlist, m);
+
+	if (cmdq->item == NULL) {
+		cmdq->cmd = NULL;
+		cmdq_continue(cmdq);
+	}
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_append(struct cmd_q *cmdq, struct cmd_list *cmdlist, struct mouse_event *m)
+{
+	struct cmd_q_item	*item;
+
+	item = xcalloc(1, sizeof *item);
+	item->cmdlist = cmdlist;
+	TAILQ_INSERT_TAIL(&cmdq->queue, item, qentry);
+	cmdlist->references++;
+
+	if (m != NULL)
+		memcpy(&item->mouse, m, sizeof item->mouse);
+	else
+		item->mouse.valid = 0;
+}"
+./repos/tmate/cmd-queue.c,"static enum cmd_retval
+cmdq_continue_one(struct cmd_q *cmdq)
+{
+	struct cmd	*cmd = cmdq->cmd;
+	enum cmd_retval	 retval;
+	char		*tmp;
+	int		 flags = !!(cmd->flags & CMD_CONTROL);
+
+#ifdef TMATE
+	if (tmate_should_replicate_cmd(cmd->entry))
+		tmate_exec_cmd(cmd);
+#endif
+
+	tmp = cmd_print(cmd);
+	log_debug(""cmdq %p: %s"", cmdq, tmp);
+	free(tmp);
+
+	cmdq->time = time(NULL);
+	cmdq->number++;
+
+	cmdq_guard(cmdq, ""begin"", flags);
+
+	if (cmd_prepare_state(cmd, cmdq, NULL) != 0)
+		goto error;
+	retval = cmd->entry->exec(cmd, cmdq);
+	if (retval == CMD_RETURN_ERROR)
+		goto error;
+
+	cmdq_guard(cmdq, ""end"", flags);
+	return (retval);
+
+error:
+	cmdq_guard(cmdq, ""error"", flags);
+	return (CMD_RETURN_ERROR);
+}"
+./repos/tmate/cmd-queue.c,"int
+cmdq_continue(struct cmd_q *cmdq)
+{
+	struct client		*c = cmdq->client;
+	struct cmd_q_item	*next;
+	enum cmd_retval		 retval;
+	int			 empty;
+
+	cmdq->references++;
+	notify_disable();
+
+	log_debug(""continuing cmdq %p: flags %#x, client %p"", cmdq, cmdq->flags,
+	    c);
+
+	empty = TAILQ_EMPTY(&cmdq->queue);
+	if (empty)
+		goto empty;
+
+	if (cmdq->item == NULL) {
+		cmdq->item = TAILQ_FIRST(&cmdq->queue);
+		cmdq->cmd = TAILQ_FIRST(&cmdq->item->cmdlist->list);
+	} else
+		cmdq->cmd = TAILQ_NEXT(cmdq->cmd, qentry);
+
+	do {
+		while (cmdq->cmd != NULL) {
+			retval = cmdq_continue_one(cmdq);
+			if (retval == CMD_RETURN_ERROR)
+				break;
+			if (retval == CMD_RETURN_WAIT)
+				goto out;
+			if (retval == CMD_RETURN_STOP) {
+				cmdq_flush(cmdq);
+				goto empty;
+			}
+			cmdq->cmd = TAILQ_NEXT(cmdq->cmd, qentry);
+		}
+		next = TAILQ_NEXT(cmdq->item, qentry);
+
+		TAILQ_REMOVE(&cmdq->queue, cmdq->item, qentry);
+		cmd_list_free(cmdq->item->cmdlist);
+		free(cmdq->item);
+
+		cmdq->item = next;
+		if (cmdq->item != NULL)
+			cmdq->cmd = TAILQ_FIRST(&cmdq->item->cmdlist->list);
+	} while (cmdq->item != NULL);
+
+empty:
+	if (cmdq->client_exit > 0)
+		cmdq->client->flags |= CLIENT_EXIT;
+	if (cmdq->emptyfn != NULL)
+		cmdq->emptyfn(cmdq);
+	empty = 1;
+
+out:
+	notify_enable();
+	cmdq_free(cmdq);
+
+	return (empty);
+}"
+./repos/tmate/cmd-queue.c,"void
+cmdq_flush(struct cmd_q *cmdq)
+{
+	struct cmd_q_item	*item, *item1;
+
+	TAILQ_FOREACH_SAFE(item, &cmdq->queue, qentry, item1) {
+		TAILQ_REMOVE(&cmdq->queue, item, qentry);
+		cmd_list_free(item->cmdlist);
+		free(item);
+	}
+	cmdq->item = NULL;
+}"
+./repos/tmate/proc.c,"static void
+proc_event_cb(__unused int fd, short events, void *arg)
+{
+	struct tmuxpeer	*peer = arg;
+	ssize_t		 n;
+	struct imsg	 imsg;
+
+	if (!(peer->flags & PEER_BAD) && (events & EV_READ)) {
+		if (((n = imsg_read(&peer->ibuf)) == -1 && errno != EAGAIN) ||
+		    n == 0) {
+			peer->dispatchcb(NULL, peer->arg);
+			return;
+		}
+		for (;;) {
+			if ((n = imsg_get(&peer->ibuf, &imsg)) == -1) {
+				peer->dispatchcb(NULL, peer->arg);
+				return;
+			}
+			if (n == 0)
+				break;
+			log_debug(""peer %p message %d"", peer, imsg.hdr.type);
+
+			if (peer_check_version(peer, &imsg) != 0) {
+				if (imsg.fd != -1)
+					close(imsg.fd);
+				imsg_free(&imsg);
+				break;
+			}
+
+			peer->dispatchcb(&imsg, peer->arg);
+			imsg_free(&imsg);
+		}
+	}
+
+	if (events & EV_WRITE) {
+		if (msgbuf_write(&peer->ibuf.w) <= 0 && errno != EAGAIN) {
+			peer->dispatchcb(NULL, peer->arg);
+			return;
+		}
+	}
+
+	if ((peer->flags & PEER_BAD) && peer->ibuf.w.queued == 0) {
+		peer->dispatchcb(NULL, peer->arg);
+		return;
+	}
+
+	proc_update_event(peer);
+}"
+./repos/tmate/proc.c,"static void
+proc_signal_cb(int signo, __unused short events, void *arg)
+{
+	struct tmuxproc	*tp = arg;
+
+	tp->signalcb(signo);
+}"
+./repos/tmate/proc.c,"static int
+peer_check_version(struct tmuxpeer *peer, struct imsg *imsg)
+{
+	int	version;
+
+	version = imsg->hdr.peerid & 0xff;
+	if (imsg->hdr.type != MSG_VERSION && version != PROTOCOL_VERSION) {
+		log_debug(""peer %p bad version %d"", peer, version);
+
+		proc_send(peer, MSG_VERSION, -1, NULL, 0);
+		peer->flags |= PEER_BAD;
+
+		return (-1);
+	}
+	return (0);
+}"
+./repos/tmate/proc.c,"static void
+proc_update_event(struct tmuxpeer *peer)
+{
+	short	events;
+
+	event_del(&peer->event);
+
+	events = EV_READ;
+	if (peer->ibuf.w.queued > 0)
+		events |= EV_WRITE;
+	event_set(&peer->event, peer->ibuf.fd, events, proc_event_cb, peer);
+
+	event_add(&peer->event, NULL);
+}"
+./repos/tmate/proc.c,"int
+proc_send(struct tmuxpeer *peer, enum msgtype type, int fd, const void *buf,
+    size_t len)
+{
+	struct imsgbuf	*ibuf = &peer->ibuf;
+	void		*vp = (void *)buf;
+	int		 retval;
+
+	if (peer->flags & PEER_BAD)
+		return (-1);
+	log_debug(""sending message %d to peer %p (%zu bytes)"", type, peer, len);
+
+	retval = imsg_compose(ibuf, type, PROTOCOL_VERSION, -1, fd, vp, len);
+	if (retval != 1)
+		return (-1);
+	proc_update_event(peer);
+	return (0);
+}"
+./repos/tmate/proc.c,"int
+proc_send_s(struct tmuxpeer *peer, enum msgtype type, const char *s)
+{
+	return (proc_send(peer, type, -1, s, strlen(s) + 1));
+}"
+./repos/tmate/proc.c,"struct tmuxproc *
+proc_start(const char *name, struct event_base *base, int forkflag,
+    void (*signalcb)(int))
+{
+	struct tmuxproc	*tp;
+	struct utsname	 u;
+
+	if (forkflag && !tmate_foreground) {
+		switch (fork()) {
+		case -1:
+			fatal(""fork failed"");
+		case 0:
+			break;
+		default:
+			return (NULL);
+		}
+		if (daemon(1, 0) != 0)
+			fatal(""daemon failed"");
+
+		clear_signals(0);
+		if (event_reinit(base) != 0)
+			fatalx(""event_reinit failed"");
+	}
+
+	if (tmate_foreground) {
+		if (forkflag)
+			clear_signals(0);
+		log_open_fp(stdout);
+	} else {
+		log_open(name);
+	}
+
+#ifdef HAVE_SETPROCTITLE
+	setproctitle(""%s (%s)"", name, socket_path);
+#endif
+
+	if (uname(&u) < 0)
+		memset(&u, 0, sizeof u);
+
+	log_debug(""%s started (%ld): socket %s, protocol %d"", name,
+	    (long)getpid(), socket_path, PROTOCOL_VERSION);
+	log_debug(""on %s %s %s; libevent %s (%s)"", u.sysname, u.release,
+	    u.version, event_get_version(), event_get_method());
+
+	tp = xcalloc(1, sizeof *tp);
+	tp->name = xstrdup(name);
+
+	tp->signalcb = signalcb;
+	set_signals(proc_signal_cb, tp);
+
+	return (tp);
+}"
+./repos/tmate/proc.c,"void
+proc_loop(struct tmuxproc *tp, int (*loopcb)(void))
+{
+	log_debug(""%s loop enter"", tp->name);
+	do
+		event_loop(EVLOOP_ONCE);
+	while (!tp->exit && (loopcb == NULL || !loopcb ()));
+	log_debug(""%s loop exit"", tp->name);
+}"
+./repos/tmate/proc.c,"void
+proc_exit(struct tmuxproc *tp)
+{
+	tp->exit = 1;
+}"
+./repos/tmate/proc.c,"struct tmuxpeer *
+proc_add_peer(struct tmuxproc *tp, int fd,
+    void (*dispatchcb)(struct imsg *, void *), void *arg)
+{
+	struct tmuxpeer	*peer;
+
+	peer = xcalloc(1, sizeof *peer);
+	peer->parent = tp;
+
+	peer->dispatchcb = dispatchcb;
+	peer->arg = arg;
+
+	imsg_init(&peer->ibuf, fd);
+	event_set(&peer->event, fd, EV_READ, proc_event_cb, peer);
+
+	log_debug(""add peer %p: %d (%p)"", peer, fd, arg);
+
+	proc_update_event(peer);
+	return (peer);
+}"
+./repos/tmate/proc.c,"void
+proc_remove_peer(struct tmuxpeer *peer)
+{
+	log_debug(""remove peer %p"", peer);
+
+	event_del(&peer->event);
+	imsg_clear(&peer->ibuf);
+
+	close(peer->ibuf.fd);
+	free(peer);
+}"
+./repos/tmate/proc.c,"void
+proc_kill_peer(struct tmuxpeer *peer)
+{
+	peer->flags |= PEER_BAD;
+}"
+./repos/tmate/window-clock.c,"void
+window_clock_timer_callback(__unused int fd, __unused short events, void *arg)
+{
+	struct window_pane		*wp = arg;
+	struct window_clock_mode_data	*data = wp->modedata;
+	struct tm			 now, then;
+	time_t				 t;
+	struct timeval			 tv = { .tv_sec = 1 };
+
+	evtimer_del(&data->timer);
+	evtimer_add(&data->timer, &tv);
+
+	t = time(NULL);
+	gmtime_r(&t, &now);
+	gmtime_r(&data->tim, &then);
+	if (now.tm_min == then.tm_min)
+		return;
+	data->tim = t;
+
+	window_clock_draw_screen(wp);
+	server_redraw_window(wp->window);
+}"
+./repos/tmate/window-clock.c,"struct screen *
+window_clock_init(struct window_pane *wp)
+{
+	struct window_clock_mode_data	*data;
+	struct screen			*s;
+	struct timeval			 tv = { .tv_sec = 1 };
+
+	wp->modedata = data = xmalloc(sizeof *data);
+	data->tim = time(NULL);
+
+	evtimer_set(&data->timer, window_clock_timer_callback, wp);
+	evtimer_add(&data->timer, &tv);
+
+	s = &data->screen;
+	screen_init(s, screen_size_x(&wp->base), screen_size_y(&wp->base), 0);
+	s->mode &= ~MODE_CURSOR;
+
+	window_clock_draw_screen(wp);
+
+	return (s);
+}"
+./repos/tmate/window-clock.c,"void
+window_clock_free(struct window_pane *wp)
+{
+	struct window_clock_mode_data	*data = wp->modedata;
+
+	evtimer_del(&data->timer);
+	screen_free(&data->screen);
+	free(data);
+}"
+./repos/tmate/window-clock.c,"void
+window_clock_resize(struct window_pane *wp, u_int sx, u_int sy)
+{
+	struct window_clock_mode_data	*data = wp->modedata;
+	struct screen			*s = &data->screen;
+
+	screen_resize(s, sx, sy, 0);
+	window_clock_draw_screen(wp);
+}"
+./repos/tmate/window-clock.c,"void
+window_clock_key(struct window_pane *wp, __unused struct client *c,
+    __unused struct session *sess, __unused key_code key,
+    __unused struct mouse_event *m)
+{
+	window_pane_reset_mode(wp);
+}"
+./repos/tmate/window-clock.c,"void
+window_clock_draw_screen(struct window_pane *wp)
+{
+	struct window_clock_mode_data	*data = wp->modedata;
+	struct screen_write_ctx	 	 ctx;
+	int				 colour, style;
+	struct screen			*s = &data->screen;
+	struct grid_cell		 gc;
+	char				 tim[64], *ptr;
+	time_t				 t;
+	struct tm			*tm;
+	u_int				 i, j, x, y, idx;
+
+	colour = options_get_number(wp->window->options, ""clock-mode-colour"");
+	style = options_get_number(wp->window->options, ""clock-mode-style"");
+
+	screen_write_start(&ctx, NULL, s);
+
+	t = time(NULL);
+	tm = localtime(&t);
+	if (style == 0) {
+		strftime(tim, sizeof tim, ""%l:%M "", localtime(&t));
+		if (tm->tm_hour >= 12)
+			strlcat(tim, ""PM"", sizeof tim);
+		else
+			strlcat(tim, ""AM"", sizeof tim);
+	} else
+		strftime(tim, sizeof tim, ""%H:%M"", tm);
+
+	screen_write_clearscreen(&ctx);
+
+	if (screen_size_x(s) < 6 * strlen(tim) || screen_size_y(s) < 6) {
+		if (screen_size_x(s) >= strlen(tim) && screen_size_y(s) != 0) {
+			x = (screen_size_x(s) / 2) - (strlen(tim) / 2);
+			y = screen_size_y(s) / 2;
+			screen_write_cursormove(&ctx, x, y);
+
+			memcpy(&gc, &grid_default_cell, sizeof gc);
+			colour_set_fg(&gc, colour);
+			screen_write_puts(&ctx, &gc, ""%s"", tim);
+		}
+
+		screen_write_stop(&ctx);
+		return;
+	}
+
+	x = (screen_size_x(s) / 2) - 3 * strlen(tim);
+	y = (screen_size_y(s) / 2) - 3;
+
+	memcpy(&gc, &grid_default_cell, sizeof gc);
+	colour_set_bg(&gc, colour);
+	for (ptr = tim; *ptr != '\0'; ptr++) {
+		if (*ptr >= '0' && *ptr <= '9')
+			idx = *ptr - '0';
+		else if (*ptr == ':')
+			idx = 10;
+		else if (*ptr == 'A')
+			idx = 11;
+		else if (*ptr == 'P')
+			idx = 12;
+		else if (*ptr == 'M')
+			idx = 13;
+		else {
+			x += 6;
+			continue;
+		}
+
+		for (j = 0; j < 5; j++) {
+			for (i = 0; i < 5; i++) {
+				screen_write_cursormove(&ctx, x + i, y + j);
+				if (window_clock_table[idx][j][i])
+					screen_write_putc(&ctx, &gc, ' ');
+			}
+		}
+		x += 6;
+	}
+
+	screen_write_stop(&ctx);
+}"
+./repos/tmate/alerts.c,"void
+alerts_timer(__unused int fd, __unused short events, void *arg)
+{
+	struct window	*w = arg;
+
+	log_debug(""@%u alerts timer expired"", w->id);
+	alerts_reset(w);
+	alerts_queue(w, WINDOW_SILENCE);
+}"
+./repos/tmate/alerts.c,"void
+alerts_callback(__unused int fd, __unused short events, __unused void *arg)
+{
+	struct window	*w;
+	struct session	*s;
+	struct winlink	*wl;
+	int		 flags, alerts;
+
+	RB_FOREACH(w, windows, &windows) {
+		RB_FOREACH(s, sessions, &sessions) {
+			RB_FOREACH(wl, winlinks, &s->windows) {
+				if (wl->window != w)
+					continue;
+				flags = w->flags;
+
+				alerts = alerts_check_all(s, wl);
+
+				log_debug(""%s:%d @%u alerts check, alerts %#x, ""
+				    ""flags %#x"", s->name, wl->idx, w->id,
+				    alerts, flags);
+			}
+		}
+	}
+	alerts_fired = 0;
+}"
+./repos/tmate/alerts.c,"void
+alerts_run_hook(struct session *s, struct winlink *wl, int flags)
+{
+	struct cmd_find_state	 fs;
+
+	if (cmd_find_from_winlink(&fs, s, wl) != 0)
+		return;
+
+	if (flags & WINDOW_BELL)
+		hooks_run(s->hooks, NULL, &fs, ""alert-bell"");
+	if (flags & WINDOW_SILENCE)
+		hooks_run(s->hooks, NULL, &fs, ""alert-silence"");
+	if (flags & WINDOW_ACTIVITY)
+		hooks_run(s->hooks, NULL, &fs, ""alert-activity"");
+}"
+./repos/tmate/alerts.c,"int
+alerts_check_all(struct session *s, struct winlink *wl)
+{
+	int	alerts;
+
+	alerts  = alerts_check_bell(s, wl);
+	alerts |= alerts_check_activity(s, wl);
+	alerts |= alerts_check_silence(s, wl);
+	if (alerts != 0) {
+		alerts_run_hook(s, wl, alerts);
+		server_status_session(s);
+	}
+
+	return (alerts);
+}"
+./repos/tmate/alerts.c,"void
+alerts_check_session(struct session *s)
+{
+	struct winlink	*wl;
+
+	RB_FOREACH(wl, winlinks, &s->windows)
+		alerts_check_all(s, wl);
+}"
+./repos/tmate/alerts.c,"int
 alerts_enabled(struct window *w, int flags)
 {
 	if (flags & WINDOW_BELL)
 		return (1);
 	if (flags & WINDOW_ACTIVITY) {
-		if (options_get_number(w->options, monitor-activity))
+		if (options_get_number(w->options, ""monitor-activity""))
 			return (1);
 	}
 	if (flags & WINDOW_SILENCE) {
-		if (options_get_number(w->options, monitor-silence) != 0)
+		if (options_get_number(w->options, ""monitor-silence"") != 0)
 			return (1);
 	}
 	return (0);
 }"
-4,"void
+./repos/tmate/alerts.c,"void
+alerts_reset_all(void)
+{
+	struct window	*w;
+
+	RB_FOREACH(w, windows, &windows)
+		alerts_reset(w);
+}"
+./repos/tmate/alerts.c,"void
+alerts_reset(struct window *w)
+{
+	struct timeval	tv;
+
+	w->flags &= ~WINDOW_SILENCE;
+	event_del(&w->alerts_timer);
+
+	timerclear(&tv);
+	tv.tv_sec = options_get_number(w->options, ""monitor-silence"");
+
+	log_debug(""@%u alerts timer reset %u"", w->id, (u_int)tv.tv_sec);
+	if (tv.tv_sec != 0)
+		event_add(&w->alerts_timer, &tv);
+}"
+./repos/tmate/alerts.c,"void
+alerts_queue(struct window *w, int flags)
+{
+	if (w->flags & WINDOW_ACTIVITY)
+		alerts_reset(w);
+
+	if (!event_initialized(&w->alerts_timer))
+		evtimer_set(&w->alerts_timer, alerts_timer, w);
+
+	if (!alerts_fired) {
+		w->flags |= flags;
+		log_debug(""@%u alerts flags added %#x"", w->id, flags);
+
+		if (alerts_enabled(w, flags)) {
+			log_debug(""alerts check queued (by @%u)"", w->id);
+			event_once(-1, EV_TIMEOUT, alerts_callback, NULL, NULL);
+			alerts_fired = 1;
+		}
+	}
+}"
+./repos/tmate/alerts.c,"int
+alerts_check_bell(struct session *s, struct winlink *wl)
+{
+	struct client	*c;
+	struct window	*w = wl->window;
+	int		 action, visual;
+
+	if (!(w->flags & WINDOW_BELL))
+		return (0);
+	if (s->curw != wl) {
+		wl->flags |= WINLINK_BELL;
+		w->flags &= ~WINDOW_BELL;
+	}
+	if (s->curw->window == w)
+		w->flags &= ~WINDOW_BELL;
+
+	action = options_get_number(s->options, ""bell-action"");
+	if (action == BELL_NONE)
+		return (0);
+
+	visual = options_get_number(s->options, ""visual-bell"");
+	TAILQ_FOREACH(c, &clients, entry) {
+		if (c->session != s || c->flags & CLIENT_CONTROL)
+			continue;
+		if (!visual) {
+			if ((action == BELL_CURRENT &&
+			    c->session->curw->window == w) ||
+			    (action == BELL_OTHER &&
+			    c->session->curw->window != w) ||
+			    action == BELL_ANY)
+				tty_putcode(&c->tty, TTYC_BEL);
+			continue;
+		}
+		if (action == BELL_CURRENT && c->session->curw->window == w)
+			status_message_set(c, ""Bell in current window"");
+		else if (action == BELL_ANY || (action == BELL_OTHER &&
+		    c->session->curw->window != w))
+			status_message_set(c, ""Bell in window %d"", wl->idx);
+	}
+
+	return (WINDOW_BELL);
+}"
+./repos/tmate/alerts.c,"int
+alerts_check_activity(struct session *s, struct winlink *wl)
+{
+	struct client	*c;
+	struct window	*w = wl->window;
+
+	if (s->curw->window == w)
+		w->flags &= ~WINDOW_ACTIVITY;
+
+	if (!(w->flags & WINDOW_ACTIVITY) || wl->flags & WINLINK_ACTIVITY)
+		return (0);
+	if (s->curw == wl)
+		return (0);
+
+	if (!options_get_number(w->options, ""monitor-activity""))
+		return (0);
+
+	if (options_get_number(s->options, ""bell-on-alert""))
+		alerts_ring_bell(s);
+	wl->flags |= WINLINK_ACTIVITY;
+
+	if (options_get_number(s->options, ""visual-activity"")) {
+		TAILQ_FOREACH(c, &clients, entry) {
+			if (c->session != s)
+				continue;
+			status_message_set(c, ""Activity in window %d"", wl->idx);
+		}
+	}
+
+	return (WINDOW_ACTIVITY);
+}"
+./repos/tmate/alerts.c,"int
+alerts_check_silence(struct session *s, struct winlink *wl)
+{
+	struct client	*c;
+	struct window	*w = wl->window;
+
+	if (s->curw->window == w)
+		w->flags &= ~WINDOW_SILENCE;
+
+	if (!(w->flags & WINDOW_SILENCE) || wl->flags & WINLINK_SILENCE)
+		return (0);
+	if (s->curw == wl)
+		return (0);
+
+	if (options_get_number(w->options, ""monitor-silence"") == 0)
+		return (0);
+
+	if (options_get_number(s->options, ""bell-on-alert""))
+		alerts_ring_bell(s);
+	wl->flags |= WINLINK_SILENCE;
+
+	if (options_get_number(s->options, ""visual-silence"")) {
+		TAILQ_FOREACH(c, &clients, entry) {
+			if (c->session != s)
+				continue;
+			status_message_set(c, ""Silence in window %d"", wl->idx);
+		}
+	}
+
+	return (WINDOW_SILENCE);
+}"
+./repos/tmate/alerts.c,"void
 alerts_ring_bell(struct session *s)
 {
 	struct client	*c;
@@ -67,17 +943,528 @@ alerts_ring_bell(struct session *s)
 			tty_putcode(&c->tty, TTYC_BEL);
 	}
 }"
-5,"void
-cfg_add_cause(const char *fmt, ...)
+./repos/tmate/arguments.c,"int
+args_cmp(struct args_entry *a1, struct args_entry *a2)
 {
-	va_list	 ap;
-	char	*msg;
+	return (a1->flag - a2->flag);
+}"
+./repos/tmate/arguments.c,"struct args *
+args_create(int argc, ...)
+{
+	struct args	*args;
+	va_list		 ap;
+	int		 i;
 
-	va_start(ap, fmt);
-	xvasprintf(&msg, fmt, ap);
+	args = xcalloc(1, sizeof *args);
+
+	args->argc = argc;
+	if (argc == 0)
+		args->argv = NULL;
+	else
+		args->argv = xcalloc(argc, sizeof *args->argv);
+
+	va_start(ap, argc);
+	for (i = 0; i < argc; i++)
+		args->argv[i] = xstrdup(va_arg(ap, char *));
 	va_end(ap);
 
-	cfg_ncauses++;
-	cfg_causes = xreallocarray(cfg_causes, cfg_ncauses, sizeof *cfg_causes);
-	cfg_causes[cfg_ncauses - 1] = msg;
+	return (args);
+}"
+./repos/tmate/arguments.c,"struct args_entry *
+args_find(struct args *args, u_char ch)
+{
+	struct args_entry	entry;
+
+	entry.flag = ch;
+	return (RB_FIND(args_tree, &args->tree, &entry));
+}"
+./repos/tmate/arguments.c,"struct args *
+args_parse(const char *template, int argc, char **argv)
+{
+	struct args	*args;
+	int		 opt;
+
+	args = xcalloc(1, sizeof *args);
+
+	optreset = 1;
+	optind = 1;
+
+	while ((opt = getopt(argc, argv, template)) != -1) {
+		if (opt < 0)
+			continue;
+		if (opt == '?' || strchr(template, opt) == NULL) {
+			args_free(args);
+			return (NULL);
+		}
+		args_set(args, opt, optarg);
+	}
+	argc -= optind;
+	argv += optind;
+
+	args->argc = argc;
+	args->argv = cmd_copy_argv(argc, argv);
+
+	return (args);
+}"
+./repos/tmate/arguments.c,"void
+args_free(struct args *args)
+{
+	struct args_entry	*entry;
+	struct args_entry	*entry1;
+
+	cmd_free_argv(args->argc, args->argv);
+
+	RB_FOREACH_SAFE(entry, args_tree, &args->tree, entry1) {
+		RB_REMOVE(args_tree, &args->tree, entry);
+		free(entry->value);
+		free(entry);
+	}
+
+	free(args);
+}"
+./repos/tmate/arguments.c,"static void printflike(3, 4)
+args_print_add(char **buf, size_t *len, const char *fmt, ...)
+{
+	va_list  ap;
+	char	*s;
+	size_t	 slen;
+
+	va_start(ap, fmt);
+	slen = xvasprintf(&s, fmt, ap);
+	va_end(ap);
+
+	*len += slen;
+	*buf = xrealloc(*buf, *len);
+
+	strlcat(*buf, s, *len);
+	free(s);
+}"
+./repos/tmate/arguments.c,"char *
+args_print(struct args *args)
+{
+	size_t		 	 len;
+	char			*buf;
+	int			 i;
+	struct args_entry	*entry;
+
+	len = 1;
+	buf = xcalloc(1, len);
+
+	/* Process the flags first. */
+	RB_FOREACH(entry, args_tree, &args->tree) {
+		if (entry->value != NULL)
+			continue;
+
+		if (*buf == '\0')
+			args_print_add(&buf, &len, ""-"");
+		args_print_add(&buf, &len, ""%c"", entry->flag);
+	}
+
+	/* Then the flags with arguments. */
+	RB_FOREACH(entry, args_tree, &args->tree) {
+		if (entry->value == NULL)
+			continue;
+
+		if (*buf != '\0')
+			args_print_add(&buf, &len, "" -%c "", entry->flag);
+		else
+			args_print_add(&buf, &len, ""-%c "", entry->flag);
+		if (strchr(entry->value, ' ') != NULL)
+			args_print_add(&buf, &len, ""\""%s\"""", entry->value);
+		else
+			args_print_add(&buf, &len, ""%s"", entry->value);
+	}
+
+	/* And finally the argument vector. */
+	for (i = 0; i < args->argc; i++) {
+		if (*buf != '\0')
+			args_print_add(&buf, &len, "" "");
+		if (strchr(args->argv[i], ' ') != NULL)
+			args_print_add(&buf, &len, ""\""%s\"""", args->argv[i]);
+		else
+			args_print_add(&buf, &len, ""%s"", args->argv[i]);
+	}
+
+	return (buf);
+}"
+./repos/tmate/arguments.c,"int
+args_has(struct args *args, u_char ch)
+{
+	return (args_find(args, ch) == NULL ? 0 : 1);
+}"
+./repos/tmate/arguments.c,"void
+args_set(struct args *args, u_char ch, const char *value)
+{
+	struct args_entry	*entry;
+
+	/* Replace existing argument. */
+	if ((entry = args_find(args, ch)) != NULL) {
+		free(entry->value);
+		entry->value = NULL;
+	} else {
+		entry = xcalloc(1, sizeof *entry);
+		entry->flag = ch;
+		RB_INSERT(args_tree, &args->tree, entry);
+	}
+
+	if (value != NULL)
+		entry->value = xstrdup(value);
+}"
+./repos/tmate/arguments.c,"const char *
+args_get(struct args *args, u_char ch)
+{
+	struct args_entry	*entry;
+
+	if ((entry = args_find(args, ch)) == NULL)
+		return (NULL);
+	return (entry->value);
+}"
+./repos/tmate/arguments.c,"long long
+args_strtonum(struct args *args, u_char ch, long long minval, long long maxval,
+    char **cause)
+{
+	const char		*errstr;
+	long long 	 	 ll;
+	struct args_entry	*entry;
+
+	if ((entry = args_find(args, ch)) == NULL) {
+		*cause = xstrdup(""missing"");
+		return (0);
+	}
+
+	ll = strtonum(entry->value, minval, maxval, &errstr);
+	if (errstr != NULL) {
+		*cause = xstrdup(errstr);
+		return (0);
+	}
+
+	*cause = NULL;
+	return (ll);
+}"
+./repos/tmate/utf8.c,"void
+utf8_set(struct utf8_data *ud, u_char ch)
+{
+	u_int	i;
+
+	*ud->data = ch;
+	ud->have = 1;
+	ud->size = 1;
+
+	ud->width = 1;
+
+	for (i = ud->size; i < sizeof ud->data; i++)
+		ud->data[i] = '\0';
+}"
+./repos/tmate/utf8.c,"void
+utf8_copy(struct utf8_data *to, const struct utf8_data *from)
+{
+	u_int	i;
+
+	memcpy(to, from, sizeof *to);
+
+	for (i = to->size; i < sizeof to->data; i++)
+		to->data[i] = '\0';
+}"
+./repos/tmate/utf8.c,"enum utf8_state
+utf8_open(struct utf8_data *ud, u_char ch)
+{
+	memset(ud, 0, sizeof *ud);
+	if (ch >= 0xc2 && ch <= 0xdf)
+		ud->size = 2;
+	else if (ch >= 0xe0 && ch <= 0xef)
+		ud->size = 3;
+	else if (ch >= 0xf0 && ch <= 0xf4)
+		ud->size = 4;
+	else
+		return (UTF8_ERROR);
+	utf8_append(ud, ch);
+	return (UTF8_MORE);
+}"
+./repos/tmate/utf8.c,"enum utf8_state
+utf8_append(struct utf8_data *ud, u_char ch)
+{
+	wchar_t	wc;
+	int	width;
+
+	if (ud->have >= ud->size)
+		fatalx(""UTF-8 character overflow"");
+	if (ud->size > sizeof ud->data)
+		fatalx(""UTF-8 character size too large"");
+
+	if (ud->have != 0 && (ch & 0xc0) != 0x80)
+		ud->width = 0xff;
+
+	ud->data[ud->have++] = ch;
+	if (ud->have != ud->size)
+		return (UTF8_MORE);
+
+	if (ud->width == 0xff)
+		return (UTF8_ERROR);
+
+	if (utf8_combine(ud, &wc) != UTF8_DONE)
+		return (UTF8_ERROR);
+	if ((width = utf8_width(wc)) < 0)
+		return (UTF8_ERROR);
+	ud->width = width;
+
+	return (UTF8_DONE);
+}"
+./repos/tmate/utf8.c,"static int
+utf8_width(wchar_t wc)
+{
+	int	width;
+
+	width = wcwidth(wc);
+	if (width < 0 || width > 0xff)
+		return (-1);
+	return (width);
+}"
+./repos/tmate/utf8.c,"enum utf8_state
+utf8_combine(const struct utf8_data *ud, wchar_t *wc)
+{
+	switch (mbtowc(wc, ud->data, ud->size)) {
+	case -1:
+		mbtowc(NULL, NULL, MB_CUR_MAX);
+		return (UTF8_ERROR);
+	case 0:
+		return (UTF8_ERROR);
+	default:
+		return (UTF8_DONE);
+	}
+}"
+./repos/tmate/utf8.c,"enum utf8_state
+utf8_split(wchar_t wc, struct utf8_data *ud)
+{
+	char	s[MB_LEN_MAX];
+	int	slen;
+
+	slen = wctomb(s, wc);
+	if (slen <= 0 || slen > (int)sizeof ud->data)
+		return (UTF8_ERROR);
+
+	memcpy(ud->data, s, slen);
+	ud->size = slen;
+
+	ud->width = utf8_width(wc);
+	return (UTF8_DONE);
+}"
+./repos/tmate/utf8.c,"int
+utf8_strvis(char *dst, const char *src, size_t len, int flag)
+{
+	struct utf8_data	 ud;
+	const char		*start, *end;
+	enum utf8_state		 more;
+	size_t			 i;
+
+	start = dst;
+	end = src + len;
+
+	while (src < end) {
+		if ((more = utf8_open(&ud, *src)) == UTF8_MORE) {
+			while (++src < end && more == UTF8_MORE)
+				more = utf8_append(&ud, *src);
+			if (more == UTF8_DONE) {
+				/* UTF-8 character finished. */
+				for (i = 0; i < ud.size; i++)
+					*dst++ = ud.data[i];
+				continue;
+			}
+			/* Not a complete, valid UTF-8 character. */
+			src -= ud.have;
+		}
+		if (src < end - 1)
+			dst = vis(dst, src[0], flag, src[1]);
+		else if (src < end)
+			dst = vis(dst, src[0], flag, '\0');
+		src++;
+	}
+
+	*dst = '\0';
+	return (dst - start);
+}"
+./repos/tmate/utf8.c,"char *
+utf8_sanitize(const char *src)
+{
+	char			*dst;
+	size_t			 n;
+	enum utf8_state		 more;
+	struct utf8_data	 ud;
+	u_int			 i;
+
+	dst = NULL;
+
+	n = 0;
+	while (*src != '\0') {
+		dst = xreallocarray(dst, n + 1, sizeof *dst);
+		if ((more = utf8_open(&ud, *src)) == UTF8_MORE) {
+			while (*++src != '\0' && more == UTF8_MORE)
+				more = utf8_append(&ud, *src);
+			if (more == UTF8_DONE) {
+				dst = xreallocarray(dst, n + ud.width,
+				    sizeof *dst);
+				for (i = 0; i < ud.width; i++)
+					dst[n++] = '_';
+				continue;
+			}
+			src -= ud.have;
+		}
+		if (*src > 0x1f && *src < 0x7f)
+			dst[n++] = *src;
+		else
+			dst[n++] = '_';
+		src++;
+	}
+
+	dst = xreallocarray(dst, n + 1, sizeof *dst);
+	dst[n] = '\0';
+	return (dst);
+}"
+./repos/tmate/utf8.c,"struct utf8_data *
+utf8_fromcstr(const char *src)
+{
+	struct utf8_data	*dst;
+	size_t			 n;
+	enum utf8_state		 more;
+
+	dst = NULL;
+
+	n = 0;
+	while (*src != '\0') {
+		dst = xreallocarray(dst, n + 1, sizeof *dst);
+		if ((more = utf8_open(&dst[n], *src)) == UTF8_MORE) {
+			while (*++src != '\0' && more == UTF8_MORE)
+				more = utf8_append(&dst[n], *src);
+			if (more == UTF8_DONE) {
+				n++;
+				continue;
+			}
+			src -= dst[n].have;
+		}
+		utf8_set(&dst[n], *src);
+		n++;
+		src++;
+	}
+
+	dst = xreallocarray(dst, n + 1, sizeof *dst);
+	dst[n].size = 0;
+	return (dst);
+}"
+./repos/tmate/utf8.c,"char *
+utf8_tocstr(struct utf8_data *src)
+{
+	char	*dst;
+	size_t	 n;
+
+	dst = NULL;
+
+	n = 0;
+	for(; src->size != 0; src++) {
+		dst = xreallocarray(dst, n + src->size, 1);
+		memcpy(dst + n, src->data, src->size);
+		n += src->size;
+	}
+
+	dst = xreallocarray(dst, n + 1, 1);
+	dst[n] = '\0';
+	return (dst);
+}"
+./repos/tmate/utf8.c,"u_int
+utf8_cstrwidth(const char *s)
+{
+	struct utf8_data	tmp;
+	u_int			width;
+	enum utf8_state		more;
+
+	width = 0;
+	while (*s != '\0') {
+		if ((more = utf8_open(&tmp, *s)) == UTF8_MORE) {
+			while (*++s != '\0' && more == UTF8_MORE)
+				more = utf8_append(&tmp, *s);
+			if (more == UTF8_DONE) {
+				width += tmp.width;
+				continue;
+			}
+			s -= tmp.have;
+		}
+		if (*s > 0x1f && *s != 0x7f)
+			width++;
+		s++;
+	}
+	return (width);
+}"
+./repos/tmate/utf8.c,"char *
+utf8_trimcstr(const char *s, u_int width)
+{
+	struct utf8_data	*tmp, *next;
+	char			*out;
+	u_int			 at;
+
+	tmp = utf8_fromcstr(s);
+
+	at = 0;
+	for (next = tmp; next->size != 0; next++) {
+		if (at + next->width > width) {
+			next->size = 0;
+			break;
+		}
+		at += next->width;
+	}
+
+	out = utf8_tocstr(tmp);
+	free(tmp);
+	return (out);
+}"
+./repos/tmate/utf8.c,"char *
+utf8_rtrimcstr(const char *s, u_int width)
+{
+	struct utf8_data	*tmp, *next, *end;
+	char			*out;
+	u_int			 at;
+
+	tmp = utf8_fromcstr(s);
+
+	for (end = tmp; end->size != 0; end++)
+		/* nothing */;
+	if (end == tmp) {
+		free(tmp);
+		return (xstrdup(""""));
+	}
+	next = end - 1;
+
+	at = 0;
+	for (;;)
+	{
+		if (at + next->width > width) {
+			next++;
+			break;
+		}
+		at += next->width;
+
+		if (next == tmp)
+			break;
+		next--;
+	}
+
+	out = utf8_tocstr(next);
+	free(tmp);
+	return (out);
+}"
+./repos/tmate/utf8.c,"char *
+utf8_padcstr(const char *s, u_int width)
+{
+	size_t	 slen;
+	char	*out;
+	u_int	  n, i;
+
+	n = utf8_cstrwidth(s);
+	if (n >= width)
+		return (xstrdup(s));
+
+	slen = strlen(s);
+	out = xmalloc(slen + 1 + (width - n));
+	memcpy(out, s, slen);
+	for (i = n; i < width; i++)
+		out[slen++] = ' ';
+	out[slen] = '\0';
+	return (out);
 }"

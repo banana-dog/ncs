@@ -1,4 +1,4 @@
-strvis__,"int strvis(undefined2 *param_1,char *param_2,uint param_3)
+strvis,./repos/tmate/utf8.c,"int strvis(undefined2 *param_1,char *param_2,uint param_3)
 
 {
   char *pcVar1;
@@ -20,7 +20,7 @@ strvis__,"int strvis(undefined2 *param_1,char *param_2,uint param_3)
   *(undefined *)puVar3 = 0;
   return (int)puVar3 - (int)param_1;
 }"
-1,"void alerts_ring_bell(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+alerts_ring_bell,./repos/tmate/alerts.c,"void alerts_ring_bell(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                      undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                      long param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
                      undefined8 param_13,undefined8 param_14)
