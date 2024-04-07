@@ -1,13 +1,35 @@
 import csv
 import glob
+import re
+import os
 
-# Проходим по всем файлам в директории
+def remove_comments(string):
+    string = re.sub(r"//.*?\n", "", string, flags=re.MULTILINE)
+    string = re.sub(r"/\*.*?\*/", "", string, flags=re.DOTALL)
+    return string
 
 
-with open('base.csv', 'w', newline='') as new_file:
+directory = "./repos"
+
+link_files = glob.glob(f"{directory}/**/link_to_repo.txt", recursive=True)
+with open(
+    "./base.csv", "w", newline=""
+) as new_file:
     writer = csv.writer(new_file)
-    for file_path in glob.glob('./repos/tmate/*.c'):
-        with open(file_path, 'r') as file:
-            f = file.read()
-            writer.writerow([file_path, f])
+    for link_file in link_files:
+        with open(link_file, "r") as file:
+            link_content = file.read()
 
+        curr_dir = os.path.dirname(link_file)
+
+        other_files = glob.glob(f"{curr_dir}/**/*.c", recursive=True)
+
+        for other_file in other_files:
+            with open(other_file, "r") as f:
+                try:
+                    f = f.read()
+                    f = re.sub(r"(#include .+\n)|(int)|(char)|(long)|(double)|(float)|(if)|(while)|(do)|(return)|(void)|(static)|(bool)|(for)|(else)|(struct)", r"", f)
+                    f = remove_comments(f)
+                    writer.writerow([other_file, link_content, f])
+                except:
+                    continue
