@@ -1,4 +1,3248 @@
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/tmux.c#L251
+typedef unsigned char   undefined;
+
+typedef unsigned char    bool;
+typedef unsigned char    byte;
+typedef unsigned char    dwfenc;
+typedef unsigned int    dword;
+typedef long long    longlong;
+typedef unsigned long    qword;
+typedef unsigned char    uchar;
+typedef unsigned int    uint;
+typedef unsigned long    ulong;
+typedef unsigned char    undefined1;
+typedef unsigned short    undefined2;
+typedef unsigned int    undefined4;
+typedef unsigned long    undefined5;
+typedef unsigned long    undefined8;
+typedef unsigned short    ushort;
+typedef int    wchar_t;
+typedef unsigned short    word;
+typedef struct eh_frame_hdr eh_frame_hdr, *Peh_frame_hdr;
+
+struct eh_frame_hdr {
+    byte eh_frame_hdr_version; // Exception Handler Frame Header Version
+    dwfenc eh_frame_pointer_encoding; // Exception Handler Frame Pointer Encoding
+    dwfenc eh_frame_desc_entry_count_encoding; // Encoding of # of Exception Handler FDEs
+    dwfenc eh_frame_table_encoding; // Exception Handler Table Encoding
+};
+
+typedef struct NoteGnuPropertyElement_4 NoteGnuPropertyElement_4, *PNoteGnuPropertyElement_4;
+
+struct NoteGnuPropertyElement_4 {
+    dword prType;
+    dword prDatasz;
+    byte data[4];
+};
+
+typedef struct fde_table_entry fde_table_entry, *Pfde_table_entry;
+
+struct fde_table_entry {
+    dword initial_loc; // Initial Location
+    dword data_loc; // Data location
+};
+
+typedef ushort sa_family_t;
+
+typedef struct termios termios, *Ptermios;
+
+typedef uint tcflag_t;
+
+typedef uchar cc_t;
+
+typedef uint speed_t;
+
+struct termios {
+    tcflag_t c_iflag;
+    tcflag_t c_oflag;
+    tcflag_t c_cflag;
+    tcflag_t c_lflag;
+    cc_t c_line;
+    cc_t c_cc[32];
+    speed_t c_ispeed;
+    speed_t c_ospeed;
+};
+
+typedef void _IO_lock_t;
+
+typedef struct _IO_marker _IO_marker, *P_IO_marker;
+
+typedef struct _IO_FILE _IO_FILE, *P_IO_FILE;
+
+typedef long __off_t;
+
+typedef long __off64_t;
+
+typedef ulong size_t;
+
+struct _IO_FILE {
+    int _flags;
+    char *_IO_read_ptr;
+    char *_IO_read_end;
+    char *_IO_read_base;
+    char *_IO_write_base;
+    char *_IO_write_ptr;
+    char *_IO_write_end;
+    char *_IO_buf_base;
+    char *_IO_buf_end;
+    char *_IO_save_base;
+    char *_IO_backup_base;
+    char *_IO_save_end;
+    struct _IO_marker *_markers;
+    struct _IO_FILE *_chain;
+    int _fileno;
+    int _flags2;
+    __off_t _old_offset;
+    ushort _cur_column;
+    char _vtable_offset;
+    char _shortbuf[1];
+    _IO_lock_t *_lock;
+    __off64_t _offset;
+    void *__pad1;
+    void *__pad2;
+    void *__pad3;
+    void *__pad4;
+    size_t __pad5;
+    int _mode;
+    char _unused2[20];
+};
+
+struct _IO_marker {
+    struct _IO_marker *_next;
+    struct _IO_FILE *_sbuf;
+    int _pos;
+};
+
+typedef struct stat stat, *Pstat;
+
+typedef ulong __dev_t;
+
+typedef ulong __ino_t;
+
+typedef ulong __nlink_t;
+
+typedef uint __mode_t;
+
+typedef uint __uid_t;
+
+typedef uint __gid_t;
+
+typedef long __blksize_t;
+
+typedef long __blkcnt_t;
+
+typedef struct timespec timespec, *Ptimespec;
+
+typedef long __time_t;
+
+struct timespec {
+    __time_t tv_sec;
+    long tv_nsec;
+};
+
+struct stat {
+    __dev_t st_dev;
+    __ino_t st_ino;
+    __nlink_t st_nlink;
+    __mode_t st_mode;
+    __uid_t st_uid;
+    __gid_t st_gid;
+    int __pad0;
+    __dev_t st_rdev;
+    __off_t st_size;
+    __blksize_t st_blksize;
+    __blkcnt_t st_blocks;
+    struct timespec st_atim;
+    struct timespec st_mtim;
+    struct timespec st_ctim;
+    long __unused[3];
+};
+
+typedef struct utsname utsname, *Putsname;
+
+struct utsname {
+    char sysname[65];
+    char nodename[65];
+    char release[65];
+    char version[65];
+    char machine[65];
+    char domainname[65];
+};
+
+typedef struct timeval timeval, *Ptimeval;
+
+typedef long __suseconds_t;
+
+struct timeval {
+    __time_t tv_sec;
+    __suseconds_t tv_usec;
+};
+
+typedef struct timezone timezone, *Ptimezone;
+
+typedef struct timezone *__timezone_ptr_t;
+
+struct timezone {
+    int tz_minuteswest;
+    int tz_dsttime;
+};
+
+typedef struct tm tm, *Ptm;
+
+struct tm {
+    int tm_sec;
+    int tm_min;
+    int tm_hour;
+    int tm_mday;
+    int tm_mon;
+    int tm_year;
+    int tm_wday;
+    int tm_yday;
+    int tm_isdst;
+    long tm_gmtoff;
+    char *tm_zone;
+};
+
+typedef __time_t time_t;
+
+typedef union _union_1457 _union_1457, *P_union_1457;
+
+typedef struct siginfo siginfo, *Psiginfo;
+
+typedef struct siginfo siginfo_t;
+
+typedef void (*__sighandler_t)(int);
+
+typedef union _union_1441 _union_1441, *P_union_1441;
+
+typedef struct _struct_1442 _struct_1442, *P_struct_1442;
+
+typedef struct _struct_1443 _struct_1443, *P_struct_1443;
+
+typedef struct _struct_1444 _struct_1444, *P_struct_1444;
+
+typedef struct _struct_1445 _struct_1445, *P_struct_1445;
+
+typedef struct _struct_1446 _struct_1446, *P_struct_1446;
+
+typedef struct _struct_1447 _struct_1447, *P_struct_1447;
+
+typedef int __pid_t;
+
+typedef union sigval sigval, *Psigval;
+
+typedef union sigval sigval_t;
+
+typedef long __clock_t;
+
+struct _struct_1445 {
+    __pid_t si_pid;
+    __uid_t si_uid;
+    int si_status;
+    __clock_t si_utime;
+    __clock_t si_stime;
+};
+
+union sigval {
+    int sival_int;
+    void *sival_ptr;
+};
+
+struct _struct_1444 {
+    __pid_t si_pid;
+    __uid_t si_uid;
+    sigval_t si_sigval;
+};
+
+struct _struct_1443 {
+    int si_tid;
+    int si_overrun;
+    sigval_t si_sigval;
+};
+
+struct _struct_1446 {
+    void *si_addr;
+};
+
+struct _struct_1447 {
+    long si_band;
+    int si_fd;
+};
+
+struct _struct_1442 {
+    __pid_t si_pid;
+    __uid_t si_uid;
+};
+
+union _union_1441 {
+    int _pad[28];
+    struct _struct_1442 _kill;
+    struct _struct_1443 _timer;
+    struct _struct_1444 _rt;
+    struct _struct_1445 _sigchld;
+    struct _struct_1446 _sigfault;
+    struct _struct_1447 _sigpoll;
+};
+
+union _union_1457 {
+    __sighandler_t sa_handler;
+    void (*sa_sigaction)(int, siginfo_t *, void *);
+};
+
+struct siginfo {
+    int si_signo;
+    int si_errno;
+    int si_code;
+    union _union_1441 _sifields;
+};
+
+typedef struct sigaction sigaction, *Psigaction;
+
+typedef struct __sigset_t __sigset_t, *P__sigset_t;
+
+struct __sigset_t {
+    ulong __val[16];
+};
+
+struct sigaction {
+    union _union_1457 __sigaction_handler;
+    struct __sigset_t sa_mask;
+    int sa_flags;
+    void (*sa_restorer)(void);
+};
+
+typedef struct _IO_FILE FILE;
+
+typedef struct sockaddr sockaddr, *Psockaddr;
+
+struct sockaddr {
+    sa_family_t sa_family;
+    char sa_data[14];
+};
+
+typedef struct msghdr msghdr, *Pmsghdr;
+
+typedef uint __socklen_t;
+
+typedef __socklen_t socklen_t;
+
+typedef struct iovec iovec, *Piovec;
+
+struct msghdr {
+    void *msg_name;
+    socklen_t msg_namelen;
+    struct iovec *msg_iov;
+    size_t msg_iovlen;
+    void *msg_control;
+    size_t msg_controllen;
+    int msg_flags;
+};
+
+struct iovec {
+    void *iov_base;
+    size_t iov_len;
+};
+
+typedef struct __sigset_t sigset_t;
+
+typedef long __ssize_t;
+
+typedef __ssize_t ssize_t;
+
+typedef int __int32_t;
+
+typedef uint __useconds_t;
+
+typedef struct passwd passwd, *Ppasswd;
+
+struct passwd {
+    char *pw_name;
+    char *pw_passwd;
+    __uid_t pw_uid;
+    __gid_t pw_gid;
+    char *pw_gecos;
+    char *pw_dir;
+    char *pw_shell;
+};
+
+typedef int nl_item;
+
+typedef struct __dirstream __dirstream, *P__dirstream;
+
+struct __dirstream {
+};
+
+typedef struct __dirstream DIR;
+
+typedef struct dirent dirent, *Pdirent;
+
+struct dirent {
+    __ino_t d_ino;
+    __off_t d_off;
+    ushort d_reclen;
+    uchar d_type;
+    char d_name[256];
+};
+
+typedef struct re_pattern_buffer re_pattern_buffer, *Pre_pattern_buffer;
+
+typedef ulong reg_syntax_t;
+
+struct re_pattern_buffer {
+    uchar *buffer;
+    ulong allocated;
+    ulong used;
+    reg_syntax_t syntax;
+    char *fastmap;
+    uchar *translate;
+    size_t re_nsub;
+    uint can_be_null:1;
+    uint regs_allocated:2;
+    uint fastmap_accurate:1;
+    uint no_sub:1;
+    uint not_bol:1;
+    uint not_eol:1;
+    uint newline_anchor:1;
+};
+
+typedef struct regmatch_t regmatch_t, *Pregmatch_t;
+
+typedef int regoff_t;
+
+struct regmatch_t {
+    regoff_t rm_so;
+    regoff_t rm_eo;
+};
+
+typedef struct re_pattern_buffer regex_t;
+
+typedef struct Elf64_Rela Elf64_Rela, *PElf64_Rela;
+
+struct Elf64_Rela {
+    qword r_offset; // location to apply the relocation action
+    qword r_info; // the symbol table index and the type of relocation
+    qword r_addend; // a constant addend used to compute the relocatable field value
+};
+
+typedef enum Elf_ProgramHeaderType {
+    PT_NULL=0,
+    PT_LOAD=1,
+    PT_DYNAMIC=2,
+    PT_INTERP=3,
+    PT_NOTE=4,
+    PT_SHLIB=5,
+    PT_PHDR=6,
+    PT_TLS=7,
+    PT_GNU_EH_FRAME=1685382480,
+    PT_GNU_STACK=1685382481,
+    PT_GNU_RELRO=1685382482
+} Elf_ProgramHeaderType;
+
+typedef struct Elf64_Sym Elf64_Sym, *PElf64_Sym;
+
+struct Elf64_Sym {
+    dword st_name;
+    byte st_info;
+    byte st_other;
+    word st_shndx;
+    qword st_value;
+    qword st_size;
+};
+
+typedef struct Elf64_Dyn Elf64_Dyn, *PElf64_Dyn;
+
+typedef enum Elf64_DynTag {
+    DT_NULL=0,
+    DT_NEEDED=1,
+    DT_PLTRELSZ=2,
+    DT_PLTGOT=3,
+    DT_HASH=4,
+    DT_STRTAB=5,
+    DT_SYMTAB=6,
+    DT_RELA=7,
+    DT_RELASZ=8,
+    DT_RELAENT=9,
+    DT_STRSZ=10,
+    DT_SYMENT=11,
+    DT_INIT=12,
+    DT_FINI=13,
+    DT_SONAME=14,
+    DT_RPATH=15,
+    DT_SYMBOLIC=16,
+    DT_REL=17,
+    DT_RELSZ=18,
+    DT_RELENT=19,
+    DT_PLTREL=20,
+    DT_DEBUG=21,
+    DT_TEXTREL=22,
+    DT_JMPREL=23,
+    DT_BIND_NOW=24,
+    DT_INIT_ARRAY=25,
+    DT_FINI_ARRAY=26,
+    DT_INIT_ARRAYSZ=27,
+    DT_FINI_ARRAYSZ=28,
+    DT_RUNPATH=29,
+    DT_FLAGS=30,
+    DT_PREINIT_ARRAY=32,
+    DT_PREINIT_ARRAYSZ=33,
+    DT_RELRSZ=35,
+    DT_RELR=36,
+    DT_RELRENT=37,
+    DT_ANDROID_REL=1610612751,
+    DT_ANDROID_RELSZ=1610612752,
+    DT_ANDROID_RELA=1610612753,
+    DT_ANDROID_RELASZ=1610612754,
+    DT_ANDROID_RELR=1879040000,
+    DT_ANDROID_RELRSZ=1879040001,
+    DT_ANDROID_RELRENT=1879040003,
+    DT_GNU_PRELINKED=1879047669,
+    DT_GNU_CONFLICTSZ=1879047670,
+    DT_GNU_LIBLISTSZ=1879047671,
+    DT_CHECKSUM=1879047672,
+    DT_PLTPADSZ=1879047673,
+    DT_MOVEENT=1879047674,
+    DT_MOVESZ=1879047675,
+    DT_FEATURE_1=1879047676,
+    DT_POSFLAG_1=1879047677,
+    DT_SYMINSZ=1879047678,
+    DT_SYMINENT=1879047679,
+    DT_GNU_XHASH=1879047924,
+    DT_GNU_HASH=1879047925,
+    DT_TLSDESC_PLT=1879047926,
+    DT_TLSDESC_GOT=1879047927,
+    DT_GNU_CONFLICT=1879047928,
+    DT_GNU_LIBLIST=1879047929,
+    DT_CONFIG=1879047930,
+    DT_DEPAUDIT=1879047931,
+    DT_AUDIT=1879047932,
+    DT_PLTPAD=1879047933,
+    DT_MOVETAB=1879047934,
+    DT_SYMINFO=1879047935,
+    DT_VERSYM=1879048176,
+    DT_RELACOUNT=1879048185,
+    DT_RELCOUNT=1879048186,
+    DT_FLAGS_1=1879048187,
+    DT_VERDEF=1879048188,
+    DT_VERDEFNUM=1879048189,
+    DT_VERNEED=1879048190,
+    DT_VERNEEDNUM=1879048191,
+    DT_AUXILIARY=2147483645,
+    DT_FILTER=2147483647
+} Elf64_DynTag;
+
+struct Elf64_Dyn {
+    enum Elf64_DynTag d_tag;
+    qword d_val;
+};
+
+typedef struct Elf64_Shdr Elf64_Shdr, *PElf64_Shdr;
+
+typedef enum Elf_SectionHeaderType {
+    SHT_NULL=0,
+    SHT_PROGBITS=1,
+    SHT_SYMTAB=2,
+    SHT_STRTAB=3,
+    SHT_RELA=4,
+    SHT_HASH=5,
+    SHT_DYNAMIC=6,
+    SHT_NOTE=7,
+    SHT_NOBITS=8,
+    SHT_REL=9,
+    SHT_SHLIB=10,
+    SHT_DYNSYM=11,
+    SHT_INIT_ARRAY=14,
+    SHT_FINI_ARRAY=15,
+    SHT_PREINIT_ARRAY=16,
+    SHT_GROUP=17,
+    SHT_SYMTAB_SHNDX=18,
+    SHT_ANDROID_REL=1610612737,
+    SHT_ANDROID_RELA=1610612738,
+    SHT_GNU_ATTRIBUTES=1879048181,
+    SHT_GNU_HASH=1879048182,
+    SHT_GNU_LIBLIST=1879048183,
+    SHT_CHECKSUM=1879048184,
+    SHT_SUNW_move=1879048186,
+    SHT_SUNW_COMDAT=1879048187,
+    SHT_SUNW_syminfo=1879048188,
+    SHT_GNU_verdef=1879048189,
+    SHT_GNU_verneed=1879048190,
+    SHT_GNU_versym=1879048191
+} Elf_SectionHeaderType;
+
+struct Elf64_Shdr {
+    dword sh_name;
+    enum Elf_SectionHeaderType sh_type;
+    qword sh_flags;
+    qword sh_addr;
+    qword sh_offset;
+    qword sh_size;
+    dword sh_link;
+    dword sh_info;
+    qword sh_addralign;
+    qword sh_entsize;
+};
+
+typedef struct GnuBuildId GnuBuildId, *PGnuBuildId;
+
+struct GnuBuildId {
+    dword namesz; // Length of name field
+    dword descsz; // Length of description field
+    dword type; // Vendor specific type
+    char name[4]; // Vendor name
+    byte hash[20];
+};
+
+typedef struct NoteGnuProperty_4 NoteGnuProperty_4, *PNoteGnuProperty_4;
+
+struct NoteGnuProperty_4 {
+    dword namesz; // Length of name field
+    dword descsz; // Length of description field
+    dword type; // Vendor specific type
+    char name[4]; // Vendor name
+};
+
+typedef struct Elf64_Ehdr Elf64_Ehdr, *PElf64_Ehdr;
+
+struct Elf64_Ehdr {
+    byte e_ident_magic_num;
+    char e_ident_magic_str[3];
+    byte e_ident_class;
+    byte e_ident_data;
+    byte e_ident_version;
+    byte e_ident_osabi;
+    byte e_ident_abiversion;
+    byte e_ident_pad[7];
+    word e_type;
+    word e_machine;
+    dword e_version;
+    qword e_entry;
+    qword e_phoff;
+    qword e_shoff;
+    dword e_flags;
+    word e_ehsize;
+    word e_phentsize;
+    word e_phnum;
+    word e_shentsize;
+    word e_shnum;
+    word e_shstrndx;
+};
+
+typedef struct Elf64_Phdr Elf64_Phdr, *PElf64_Phdr;
+
+struct Elf64_Phdr {
+    enum Elf_ProgramHeaderType p_type;
+    dword p_flags;
+    qword p_offset;
+    qword p_vaddr;
+    qword p_paddr;
+    qword p_filesz;
+    qword p_memsz;
+    qword p_align;
+};
+
+typedef struct NoteAbiTag NoteAbiTag, *PNoteAbiTag;
+
+struct NoteAbiTag {
+    dword namesz; // Length of name field
+    dword descsz; // Length of description field
+    dword type; // Vendor specific type
+    char name[4]; // Vendor name
+    dword abiType; // 0 == Linux
+    dword requiredKernelVersion[3]; // Major.minor.patch
+};
+
+typedef struct GnuDebugLink_48 GnuDebugLink_48, *PGnuDebugLink_48;
+
+struct GnuDebugLink_48 {
+    char filename[48];
+    dword crc;
+};
+
+
+
+
+void _DT_INIT(void)
+
+{
+  __gmon_start__();
+  return;
+}
+
+
+
+void FUN_00122020(void)
+
+{
+  (*(code *)(undefined *)0x0)();
+  return;
+}
+
+
+
+void __cxa_finalize(void)
+
+{
+  __cxa_finalize();
+  return;
+}
+
+
+
+void __printf_chk(void)
+
+{
+  __printf_chk();
+  return;
+}
+
+
+
+void FUN_00122e40(void)
+
+{
+  ssh_channel_read_nonblocking();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int setvbuf(FILE *__stream,char *__buf,int __modes,size_t __n)
+
+{
+  int iVar1;
+  
+  iVar1 = setvbuf(__stream,__buf,__modes,__n);
+  return iVar1;
+}
+
+
+
+void event_set(void)
+
+{
+  event_set();
+  return;
+}
+
+
+
+void event_loop(void)
+
+{
+  event_loop();
+  return;
+}
+
+
+
+void evbuffer_new(void)
+
+{
+  evbuffer_new();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int * __errno_location(void)
+
+{
+  int *piVar1;
+  
+  piVar1 = __errno_location();
+  return piVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void tzset(void)
+
+{
+  tzset();
+  return;
+}
+
+
+
+void msgpack_zone_free(void)
+
+{
+  msgpack_zone_free();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int uname(utsname *__name)
+
+{
+  int iVar1;
+  
+  iVar1 = uname(__name);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t strcspn(char *__s,char *__reject)
+
+{
+  size_t sVar1;
+  
+  sVar1 = strcspn(__s,__reject);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t __ctype_get_mb_cur_max(void)
+
+{
+  size_t sVar1;
+  
+  sVar1 = __ctype_get_mb_cur_max();
+  return sVar1;
+}
+
+
+
+void del_curterm(void)
+
+{
+  del_curterm();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__int32_t ** __ctype_toupper_loc(void)
+
+{
+  __int32_t **pp_Var1;
+  
+  pp_Var1 = __ctype_toupper_loc();
+  return pp_Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+longlong strtoll(char *__nptr,char **__endptr,int __base)
+
+{
+  longlong lVar1;
+  
+  lVar1 = strtoll(__nptr,__endptr,__base);
+  return lVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int bind(int __fd,sockaddr *__addr,socklen_t __len)
+
+{
+  int iVar1;
+  
+  iVar1 = bind(__fd,__addr,__len);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__int32_t ** __ctype_tolower_loc(void)
+
+{
+  __int32_t **pp_Var1;
+  
+  pp_Var1 = __ctype_tolower_loc();
+  return pp_Var1;
+}
+
+
+
+void event_get_method(void)
+
+{
+  event_get_method();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strstr(char *__haystack,char *__needle)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strstr(__haystack,__needle);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int socket(int __domain,int __type,int __protocol)
+
+{
+  int iVar1;
+  
+  iVar1 = socket(__domain,__type,__protocol);
+  return iVar1;
+}
+
+
+
+void bufferevent_setwatermark(void)
+
+{
+  bufferevent_setwatermark();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__pid_t fork(void)
+
+{
+  __pid_t _Var1;
+  
+  _Var1 = fork();
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int getc(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = getc(__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t recvmsg(int __fd,msghdr *__message,int __flags)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = recvmsg(__fd,__message,__flags);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+FILE * popen(char *__command,char *__modes)
+
+{
+  FILE *pFVar1;
+  
+  pFVar1 = popen(__command,__modes);
+  return pFVar1;
+}
+
+
+
+void bufferevent_free(void)
+
+{
+  bufferevent_free();
+  return;
+}
+
+
+
+void event_active(void)
+
+{
+  event_active();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int accept(int __fd,sockaddr *__addr,socklen_t *__addr_len)
+
+{
+  int iVar1;
+  
+  iVar1 = accept(__fd,__addr,__addr_len);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strerror(int __errnum)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strerror(__errnum);
+  return pcVar1;
+}
+
+
+
+void bufferevent_get_output(void)
+
+{
+  bufferevent_get_output();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t write(int __fd,void *__buf,size_t __n)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = write(__fd,__buf,__n);
+  return sVar1;
+}
+
+
+
+void evbuffer_free(void)
+
+{
+  evbuffer_free();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strchr(char *__s,int __c)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strchr(__s,__c);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * ctime(time_t *__timer)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = ctime(__timer);
+  return pcVar1;
+}
+
+
+
+void evbuffer_add_vprintf(void)
+
+{
+  evbuffer_add_vprintf();
+  return;
+}
+
+
+
+void ssh_set_callbacks(void)
+
+{
+  ssh_set_callbacks();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t strspn(char *__s,char *__accept)
+
+{
+  size_t sVar1;
+  
+  sVar1 = strspn(__s,__accept);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * dirname(char *__path)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = dirname(__path);
+  return pcVar1;
+}
+
+
+
+void msgpack_unpacker_next(void)
+
+{
+  msgpack_unpacker_next();
+  return;
+}
+
+
+
+void event_add(void)
+
+{
+  event_add();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t strlen(char *__s)
+
+{
+  size_t sVar1;
+  
+  sVar1 = strlen(__s);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int memcmp(void *__s1,void *__s2,size_t __n)
+
+{
+  int iVar1;
+  
+  iVar1 = memcmp(__s1,__s2,__n);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int mkdir(char *__path,__mode_t __mode)
+
+{
+  int iVar1;
+  
+  iVar1 = mkdir(__path,__mode);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int unlink(char *__name)
+
+{
+  int iVar1;
+  
+  iVar1 = unlink(__name);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int strncmp(char *__s1,char *__s2,size_t __n)
+
+{
+  int iVar1;
+  
+  iVar1 = strncmp(__s1,__s2,__n);
+  return iVar1;
+}
+
+
+
+void ssh_key_type(void)
+
+{
+  ssh_key_type();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__uid_t getuid(void)
+
+{
+  __uid_t _Var1;
+  
+  _Var1 = getuid();
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * getcwd(char *__buf,size_t __size)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = getcwd(__buf,__size);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t writev(int __fd,iovec *__iovec,int __count)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = writev(__fd,__iovec,__count);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int dirfd(DIR *__dirp)
+
+{
+  int iVar1;
+  
+  iVar1 = dirfd(__dirp);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * memset(void *__s,int __c,size_t __n)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = memset(__s,__c,__n);
+  return pvVar1;
+}
+
+
+
+void bufferevent_write(void)
+
+{
+  bufferevent_write();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fcntl(int __fd,int __cmd,...)
+
+{
+  int iVar1;
+  
+  iVar1 = fcntl(__fd,__cmd);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int wctomb(char *__s,wchar_t __wchar)
+
+{
+  int iVar1;
+  
+  iVar1 = wctomb(__s,__wchar);
+  return iVar1;
+}
+
+
+
+void setupterm(void)
+
+{
+  setupterm();
+  return;
+}
+
+
+
+void __sprintf_chk(void)
+
+{
+  __sprintf_chk();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int cfsetispeed(termios *__termios_p,speed_t __speed)
+
+{
+  int iVar1;
+  
+  iVar1 = cfsetispeed(__termios_p,__speed);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int mbtowc(wchar_t *__pwc,char *__s,size_t __n)
+
+{
+  int iVar1;
+  
+  iVar1 = mbtowc(__pwc,__s,__n);
+  return iVar1;
+}
+
+
+
+void ssh_get_fingerprint_hash(void)
+
+{
+  ssh_get_fingerprint_hash();
+  return;
+}
+
+
+
+void __snprintf_chk(void)
+
+{
+  __snprintf_chk();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__pid_t tcgetpgrp(int __fd)
+
+{
+  __pid_t _Var1;
+  
+  _Var1 = tcgetpgrp(__fd);
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strsep(char **__stringp,char *__delim)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strsep(__stringp,__delim);
+  return pcVar1;
+}
+
+
+
+void evbuffer_add_printf(void)
+
+{
+  evbuffer_add_printf();
+  return;
+}
+
+
+
+void event_init(void)
+
+{
+  event_init();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+long sysconf(int __name)
+
+{
+  long lVar1;
+  
+  lVar1 = sysconf(__name);
+  return lVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void __assert_fail(char *__assertion,char *__file,uint __line,char *__function)
+
+{
+                    // WARNING: Subroutine does not return
+  __assert_fail(__assertion,__file,__line,__function);
+}
+
+
+
+void msgpack_unpacker_expand_buffer(void)
+
+{
+  msgpack_unpacker_expand_buffer();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * calloc(size_t __nmemb,size_t __size)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = calloc(__nmemb,__size);
+  return pvVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * ttyname(int __fd)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = ttyname(__fd);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int open(char *__file,int __oflag,...)
+
+{
+  int iVar1;
+  
+  iVar1 = open(__file,__oflag);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+tm * localtime(time_t *__timer)
+
+{
+  tm *ptVar1;
+  
+  ptVar1 = localtime(__timer);
+  return ptVar1;
+}
+
+
+
+void FUN_001232a0(void)
+
+{
+  ssh_key_free();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int execvp(char *__file,char **__argv)
+
+{
+  int iVar1;
+  
+  iVar1 = execvp(__file,__argv);
+  return iVar1;
+}
+
+
+
+void FUN_001232c0(void)
+
+{
+  ssh_channel_new();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__pid_t waitpid(__pid_t __pid,int *__stat_loc,int __options)
+
+{
+  __pid_t _Var1;
+  
+  _Var1 = waitpid(__pid,__stat_loc,__options);
+  return _Var1;
+}
+
+
+
+void evbuffer_readline(void)
+
+{
+  evbuffer_readline();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+passwd * getpwnam(char *__name)
+
+{
+  passwd *ppVar1;
+  
+  ppVar1 = getpwnam(__name);
+  return ppVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t strftime(char *__s,size_t __maxsize,char *__format,tm *__tp)
+
+{
+  size_t sVar1;
+  
+  sVar1 = strftime(__s,__maxsize,__format,__tp);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t sendmsg(int __fd,msghdr *__message,int __flags)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = sendmsg(__fd,__message,__flags);
+  return sVar1;
+}
+
+
+
+void __vsnprintf_chk(void)
+
+{
+  __vsnprintf_chk();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * memcpy(void *__dest,void *__src,size_t __n)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = memcpy(__dest,__src,__n);
+  return pvVar1;
+}
+
+
+
+void event_initialized(void)
+
+{
+  event_initialized();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int connect(int __fd,sockaddr *__addr,socklen_t __len)
+
+{
+  int iVar1;
+  
+  iVar1 = connect(__fd,__addr,__len);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int system(char *__command)
+
+{
+  int iVar1;
+  
+  iVar1 = system(__command);
+  return iVar1;
+}
+
+
+
+void event_new(void)
+
+{
+  event_new();
+  return;
+}
+
+
+
+void msgpack_unpacker_init(void)
+
+{
+  msgpack_unpacker_init();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int socketpair(int __domain,int __type,int __protocol,int *__fds)
+
+{
+  int iVar1;
+  
+  iVar1 = socketpair(__domain,__type,__protocol,__fds);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * setlocale(int __category,char *__locale)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = setlocale(__category,__locale);
+  return pcVar1;
+}
+
+
+
+void bufferevent_new(void)
+
+{
+  bufferevent_new();
+  return;
+}
+
+
+
+void ssh_set_log_callback(void)
+
+{
+  ssh_set_log_callback();
+  return;
+}
+
+
+
+void ssh_new(void)
+
+{
+  ssh_new();
+  return;
+}
+
+
+
+void tparm(void)
+
+{
+  tparm();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int chmod(char *__file,__mode_t __mode)
+
+{
+  int iVar1;
+  
+  iVar1 = chmod(__file,__mode);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+time_t time(time_t *__timer)
+
+{
+  time_t tVar1;
+  
+  tVar1 = time(__timer);
+  return tVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int dup2(int __fd,int __fd2)
+
+{
+  int iVar1;
+  
+  iVar1 = dup2(__fd,__fd2);
+  return iVar1;
+}
+
+
+
+void tigetflag(void)
+
+{
+  tigetflag();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * nl_langinfo(nl_item __item)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = nl_langinfo(__item);
+  return pcVar1;
+}
+
+
+
+void __isoc99_sscanf(void)
+
+{
+  __isoc99_sscanf();
+  return;
+}
+
+
+
+void evbuffer_add(void)
+
+{
+  evbuffer_add();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fclose(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fclose(__stream);
+  return iVar1;
+}
+
+
+
+void ssh_get_fd(void)
+
+{
+  ssh_get_fd();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int __xstat(int __ver,char *__filename,stat *__stat_buf)
+
+{
+  int iVar1;
+  
+  iVar1 = __xstat(__ver,__filename,__stat_buf);
+  return iVar1;
+}
+
+
+
+void tigetnum(void)
+
+{
+  tigetnum();
+  return;
+}
+
+
+
+void ssh_get_error(void)
+
+{
+  ssh_get_error();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int wcwidth(wchar_t __c)
+
+{
+  int iVar1;
+  
+  iVar1 = wcwidth(__c);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fileno(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fileno(__stream);
+  return iVar1;
+}
+
+
+
+void evbuffer_get_length(void)
+
+{
+  evbuffer_get_length();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t readlink(char *__path,char *__buf,size_t __len)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = readlink(__path,__buf,__len);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ushort ** __ctype_b_loc(void)
+
+{
+  ushort **ppuVar1;
+  
+  ppuVar1 = __ctype_b_loc();
+  return ppuVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int strcasecmp(char *__s1,char *__s2)
+
+{
+  int iVar1;
+  
+  iVar1 = strcasecmp(__s1,__s2);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int cfsetospeed(termios *__termios_p,speed_t __speed)
+
+{
+  int iVar1;
+  
+  iVar1 = cfsetospeed(__termios_p,__speed);
+  return iVar1;
+}
+
+
+
+void evbuffer_readln(void)
+
+{
+  evbuffer_readln();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strrchr(char *__s,int __c)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strrchr(__s,__c);
+  return pcVar1;
+}
+
+
+
+void evbuffer_drain(void)
+
+{
+  evbuffer_drain();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * memchr(void *__s,int __c,size_t __n)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = memchr(__s,__c,__n);
+  return pvVar1;
+}
+
+
+
+void __stack_chk_fail(void)
+
+{
+                    // WARNING: Subroutine does not return
+  __stack_chk_fail();
+}
+
+
+
+void ssh_get_publickey_hash(void)
+
+{
+  ssh_get_publickey_hash();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int tcgetattr(int __fd,termios *__termios_p)
+
+{
+  int iVar1;
+  
+  iVar1 = tcgetattr(__fd,__termios_p);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fputs(char *__s,FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fputs(__s,__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int listen(int __fd,int __n)
+
+{
+  int iVar1;
+  
+  iVar1 = listen(__fd,__n);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int killpg(__pid_t __pgrp,int __sig)
+
+{
+  int iVar1;
+  
+  iVar1 = killpg(__pgrp,__sig);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int regcomp(regex_t *__preg,char *__pattern,int __cflags)
+
+{
+  int iVar1;
+  
+  iVar1 = regcomp(__preg,__pattern,__cflags);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+passwd * getpwuid(__uid_t __uid)
+
+{
+  passwd *ppVar1;
+  
+  ppVar1 = getpwuid(__uid);
+  return ppVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * ctime_r(time_t *__timer,char *__buf)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = ctime_r(__timer,__buf);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fflush(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fflush(__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+FILE * fopen(char *__filename,char *__modes)
+
+{
+  FILE *pFVar1;
+  
+  pFVar1 = fopen(__filename,__modes);
+  return pFVar1;
+}
+
+
+
+void FUN_00123610(void)
+
+{
+  ssh_clean_pubkey_hash();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__sighandler_t signal(int __sig,__sighandler_t __handler)
+
+{
+  __sighandler_t p_Var1;
+  
+  p_Var1 = signal(__sig,__handler);
+  return p_Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void free(void *__ptr)
+
+{
+  free(__ptr);
+  return;
+}
+
+
+
+void ssh_free(void)
+
+{
+  ssh_free();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int daemon(int __nochdir,int __noclose)
+
+{
+  int iVar1;
+  
+  iVar1 = daemon(__nochdir,__noclose);
+  return iVar1;
+}
+
+
+
+void event_get_version(void)
+
+{
+  event_get_version();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void exit(int __status)
+
+{
+                    // WARNING: Subroutine does not return
+  exit(__status);
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * getenv(char *__name)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = getenv(__name);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int regexec(regex_t *__preg,char *__string,size_t __nmatch,regmatch_t *__pmatch,int __eflags)
+
+{
+  int iVar1;
+  
+  iVar1 = regexec(__preg,__string,__nmatch,__pmatch,__eflags);
+  return iVar1;
+}
+
+
+
+void ssh_get_server_publickey(void)
+
+{
+  ssh_get_server_publickey();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int execl(char *__path,char *__arg,...)
+
+{
+  int iVar1;
+  
+  iVar1 = execl(__path,__arg);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fputc(int __c,FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fputc(__c,__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int sigemptyset(sigset_t *__set)
+
+{
+  int iVar1;
+  
+  iVar1 = sigemptyset(__set);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int sigaction(int __sig,sigaction *__act,sigaction *__oact)
+
+{
+  int iVar1;
+  
+  iVar1 = sigaction(__sig,__act,__oact);
+  return iVar1;
+}
+
+
+
+void evutil_freeaddrinfo(void)
+
+{
+  evutil_freeaddrinfo();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int strncasecmp(char *__s1,char *__s2,size_t __n)
+
+{
+  int iVar1;
+  
+  iVar1 = strncasecmp(__s1,__s2,__n);
+  return iVar1;
+}
+
+
+
+void evdns_getaddrinfo(void)
+
+{
+  evdns_getaddrinfo();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int tcsetattr(int __fd,int __optional_actions,termios *__termios_p)
+
+{
+  int iVar1;
+  
+  iVar1 = tcsetattr(__fd,__optional_actions,__termios_p);
+  return iVar1;
+}
+
+
+
+void evbuffer_pullup(void)
+
+{
+  evbuffer_pullup();
+  return;
+}
+
+
+
+void __asprintf_chk(void)
+
+{
+  __asprintf_chk();
+  return;
+}
+
+
+
+void FUN_00123750(void)
+
+{
+  ssh_userauth_publickey_auto();
+  return;
+}
+
+
+
+void event_set_log_callback(void)
+
+{
+  event_set_log_callback();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * malloc(size_t __size)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = malloc(__size);
+  return pvVar1;
+}
+
+
+
+void reallocarray(void)
+
+{
+  reallocarray();
+  return;
+}
+
+
+
+void __b64_ntop(void)
+
+{
+  __b64_ntop();
+  return;
+}
+
+
+
+void ssh_channel_write(void)
+
+{
+  ssh_channel_write();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int shutdown(int __fd,int __how)
+
+{
+  int iVar1;
+  
+  iVar1 = shutdown(__fd,__how);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int unsetenv(char *__name)
+
+{
+  int iVar1;
+  
+  iVar1 = unsetenv(__name);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void cfmakeraw(termios *__termios_p)
+
+{
+  cfmakeraw(__termios_p);
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int strcmp(char *__s1,char *__s2)
+
+{
+  int iVar1;
+  
+  iVar1 = strcmp(__s1,__s2);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__pid_t getppid(void)
+
+{
+  __pid_t _Var1;
+  
+  _Var1 = getppid();
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+long strtol(char *__nptr,char **__endptr,int __base)
+
+{
+  long lVar1;
+  
+  lVar1 = strtol(__nptr,__endptr,__base);
+  return lVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int ioctl(int __fd,ulong __request,...)
+
+{
+  int iVar1;
+  
+  iVar1 = ioctl(__fd,__request);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int usleep(__useconds_t __useconds)
+
+{
+  int iVar1;
+  
+  iVar1 = usleep(__useconds);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int pclose(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = pclose(__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int kill(__pid_t __pid,int __sig)
+
+{
+  int iVar1;
+  
+  iVar1 = kill(__pid,__sig);
+  return iVar1;
+}
+
+
+
+void FUN_00123850(void)
+
+{
+  ssh_userauth_none();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+ssize_t read(int __fd,void *__buf,size_t __nbytes)
+
+{
+  ssize_t sVar1;
+  
+  sVar1 = read(__fd,__buf,__nbytes);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__pid_t getpid(void)
+
+{
+  __pid_t _Var1;
+  
+  _Var1 = getpid();
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int chdir(char *__path)
+
+{
+  int iVar1;
+  
+  iVar1 = chdir(__path);
+  return iVar1;
+}
+
+
+
+void backtrace(void)
+
+{
+  backtrace();
+  return;
+}
+
+
+
+void backtrace_symbols(void)
+
+{
+  backtrace_symbols();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int gethostname(char *__name,size_t __len)
+
+{
+  int iVar1;
+  
+  iVar1 = gethostname(__name,__len);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+DIR * opendir(char *__name)
+
+{
+  DIR *pDVar1;
+  
+  pDVar1 = opendir(__name);
+  return pDVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int setenv(char *__name,char *__value,int __replace)
+
+{
+  int iVar1;
+  
+  iVar1 = setenv(__name,__value,__replace);
+  return iVar1;
+}
+
+
+
+void bufferevent_disable(void)
+
+{
+  bufferevent_disable();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int dup(int __fd)
+
+{
+  int iVar1;
+  
+  iVar1 = dup(__fd);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int tcflush(int __fd,int __queue_selector)
+
+{
+  int iVar1;
+  
+  iVar1 = tcflush(__fd,__queue_selector);
+  return iVar1;
+}
+
+
+
+void evdns_base_free(void)
+
+{
+  evdns_base_free();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+dirent * readdir(DIR *__dirp)
+
+{
+  dirent *pdVar1;
+  
+  pdVar1 = readdir(__dirp);
+  return pdVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fnmatch(char *__pattern,char *__name,int __flags)
+
+{
+  int iVar1;
+  
+  iVar1 = fnmatch(__pattern,__name,__flags);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int fgetc(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = fgetc(__stream);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * fgets(char *__s,int __n,FILE *__stream)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = fgets(__s,__n,__stream);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int closedir(DIR *__dirp)
+
+{
+  int iVar1;
+  
+  iVar1 = closedir(__dirp);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int gettimeofday(timeval *__tv,__timezone_ptr_t __tz)
+
+{
+  int iVar1;
+  
+  iVar1 = gettimeofday(__tv,__tz);
+  return iVar1;
+}
+
+
+
+void __realpath_chk(void)
+
+{
+  __realpath_chk();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * memmove(void *__dest,void *__src,size_t __n)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = memmove(__dest,__src,__n);
+  return pvVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void _exit(int __status)
+
+{
+                    // WARNING: Subroutine does not return
+  _exit(__status);
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+void * realloc(void *__ptr,size_t __size)
+
+{
+  void *pvVar1;
+  
+  pvVar1 = realloc(__ptr,__size);
+  return pvVar1;
+}
+
+
+
+void __fprintf_chk(void)
+
+{
+  __fprintf_chk();
+  return;
+}
+
+
+
+void event_pending(void)
+
+{
+  event_pending();
+  return;
+}
+
+
+
+void FUN_001239e0(void)
+
+{
+  ssh_set_blocking();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int access(char *__name,int __type)
+
+{
+  int iVar1;
+  
+  iVar1 = access(__name,__type);
+  return iVar1;
+}
+
+
+
+void event_free(void)
+
+{
+  event_free();
+  return;
+}
+
+
+
+void msgpack_unpacker_destroy(void)
+
+{
+  msgpack_unpacker_destroy();
+  return;
+}
+
+
+
+void forkpty(void)
+
+{
+  forkpty();
+  return;
+}
+
+
+
+void evutil_gai_strerror(void)
+
+{
+  evutil_gai_strerror();
+  return;
+}
+
+
+
+void __memcpy_chk(void)
+
+{
+  __memcpy_chk();
+  return;
+}
+
+
+
+void event_reinit(void)
+
+{
+  event_reinit();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * __xpg_basename(char *__path)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = __xpg_basename(__path);
+  return pcVar1;
+}
+
+
+
+void event_del(void)
+
+{
+  event_del();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int isatty(int __fd)
+
+{
+  int iVar1;
+  
+  iVar1 = isatty(__fd);
+  return iVar1;
+}
+
+
+
+void event_once(void)
+
+{
+  event_once();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+__mode_t umask(__mode_t __mask)
+
+{
+  __mode_t _Var1;
+  
+  _Var1 = umask(__mask);
+  return _Var1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int setsockopt(int __fd,int __level,int __optname,void *__optval,socklen_t __optlen)
+
+{
+  int iVar1;
+  
+  iVar1 = setsockopt(__fd,__level,__optname,__optval,__optlen);
+  return iVar1;
+}
+
+
+
+void evutil_inet_ntop(void)
+
+{
+  evutil_inet_ntop();
+  return;
+}
+
+
+
+void tigetstr(void)
+
+{
+  tigetstr();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strdup(char *__s)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strdup(__s);
+  return pcVar1;
+}
+
+
+
+void __vasprintf_chk(void)
+
+{
+  __vasprintf_chk();
+  return;
+}
+
+
+
+void bufferevent_enable(void)
+
+{
+  bufferevent_enable();
+  return;
+}
+
+
+
+void FUN_00123b10(void)
+
+{
+  ssh_channel_open_session();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int __lxstat(int __ver,char *__filename,stat *__stat_buf)
+
+{
+  int iVar1;
+  
+  iVar1 = __lxstat(__ver,__filename,__stat_buf);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * mktemp(char *__template)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = mktemp(__template);
+  return pcVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int ferror(FILE *__stream)
+
+{
+  int iVar1;
+  
+  iVar1 = ferror(__stream);
+  return iVar1;
+}
+
+
+
+void errx(void)
+
+{
+  errx();
+  return;
+}
+
+
+
+void flock(void)
+
+{
+  flock();
+  return;
+}
+
+
+
+void FUN_00123b70(void)
+
+{
+  ssh_channel_request_subsystem();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+speed_t cfgetispeed(termios *__termios_p)
+
+{
+  speed_t sVar1;
+  
+  sVar1 = cfgetispeed(__termios_p);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+char * strcasestr(char *__haystack,char *__needle)
+
+{
+  char *pcVar1;
+  
+  pcVar1 = strcasestr(__haystack,__needle);
+  return pcVar1;
+}
+
+
+
+void evbuffer_add_buffer(void)
+
+{
+  evbuffer_add_buffer();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+size_t fwrite(void *__ptr,size_t __size,size_t __n,FILE *__s)
+
+{
+  size_t sVar1;
+  
+  sVar1 = fwrite(__ptr,__size,__n,__s);
+  return sVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+int close(int __fd)
+
+{
+  int iVar1;
+  
+  iVar1 = close(__fd);
+  return iVar1;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+speed_t cfgetospeed(termios *__termios_p)
+
+{
+  speed_t sVar1;
+  
+  sVar1 = cfgetospeed(__termios_p);
+  return sVar1;
+}
+
+
+
+void ssh_connect(void)
+
+{
+  ssh_connect();
+  return;
+}
+
+
+
+void evdns_base_new(void)
+
+{
+  evdns_base_new();
+  return;
+}
+
+
+
+// WARNING: Unknown calling convention -- yet parameter storage is locked
+
+tm * gmtime_r(time_t *__timer,tm *__tp)
+
+{
+  tm *ptVar1;
+  
+  ptVar1 = gmtime_r(__timer,__tp);
+  return ptVar1;
+}
+
+
+
+void ssh_options_set(void)
+
+{
+  ssh_options_set();
+  return;
+}
+
+
+
+void FUN_00123c20(void)
+
+{
+  do {
+    invalidInstructionException();
+  } while( true );
+}
+
+
+
+void FUN_00123c2a(void)
+
+{
+  do {
+    invalidInstructionException();
+  } while( true );
+}
+
+
+
+void switchD_00133d4b::caseD_8(void)
+
+{
+  FUN_00133d6b();
+  return;
+}
+
+
+
 void main(undefined8 param_1,undefined8 param_2,undefined4 param_3,undefined4 param_4,
          undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,int param_9,
          char **param_10,undefined8 param_11,char *param_12,undefined8 param_13,undefined8 param_14)
@@ -379,7 +3623,7 @@ void _INIT_0(void)
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_run_hook(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                     undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                     long param_9,long param_10,uint param_11,ulong param_12,ulong param_13,
@@ -427,7 +3671,7 @@ void alerts_run_hook(undefined8 param_1,undefined4 param_2,undefined4 param_3,un
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 byte alerts_enabled(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                    undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                    long param_9,byte param_10,undefined8 param_11,undefined8 param_12,
@@ -461,7 +3705,7 @@ byte alerts_enabled(undefined8 param_1,undefined4 param_2,undefined4 param_3,und
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_reset(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                  undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                  uint *param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
@@ -494,7 +3738,7 @@ void alerts_reset(undefined8 param_1,undefined4 param_2,undefined4 param_3,undef
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_reset_all(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                      undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
@@ -526,7 +3770,7 @@ void alerts_reset_all(undefined8 param_1,undefined4 param_2,undefined4 param_3,u
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_queue(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                  undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                  uint *param_9,ulong param_10,undefined8 param_11,undefined8 param_12,uint *param_13
@@ -573,7 +3817,7 @@ void alerts_queue(undefined8 param_1,undefined4 param_2,undefined4 param_3,undef
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_timer(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                  undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                  undefined8 param_9,undefined8 param_10,uint *param_11,undefined8 param_12,
@@ -598,7 +3842,7 @@ void alerts_timer(undefined4 param_1,undefined4 param_2,undefined4 param_3,undef
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 uint alerts_check_bell(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                       undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                       long param_9,uint *param_10,undefined8 param_11,undefined8 param_12,
@@ -694,7 +3938,7 @@ LAB_0012497a:
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_ring_bell(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                      undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                      long param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
@@ -726,7 +3970,7 @@ void alerts_ring_bell(undefined4 param_1,undefined4 param_2,undefined4 param_3,u
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 undefined8
 alerts_check_activity
           (undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
@@ -802,7 +4046,7 @@ alerts_check_activity
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 undefined8
 alerts_check_silence
           (undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
@@ -878,7 +4122,7 @@ alerts_check_silence
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 uint alerts_check_all(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                      undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                      long param_9,uint *param_10,undefined8 param_11,ulong param_12,ulong param_13,
@@ -913,7 +4157,7 @@ uint alerts_check_all(undefined8 param_1,undefined4 param_2,undefined4 param_3,u
 }
 
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
 void alerts_callback(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                     undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
@@ -979,7 +4223,8 @@ LAB_00124dee:
   } while( true );
 }
 
-//https://github.com/tmate-io/tmate/blob/ac919516f4f1b10ec928e20b3a5034d18f609d68/alerts.c#L32
+
+
 void alerts_check_session
                (undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
@@ -1737,7 +4982,7 @@ long args_tree_RB_MINMAX(long *param_1,int param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 int args_cmp(byte *param_1,byte *param_2)
 
 {
@@ -1745,7 +4990,7 @@ int args_cmp(byte *param_1,byte *param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 long args_create(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                 undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                 int param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
@@ -1824,7 +5069,7 @@ long args_create(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefi
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 void args_find(byte **param_1,byte param_2)
 
 {
@@ -1849,7 +5094,7 @@ void args_find(byte **param_1,byte param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 void args_free(void **param_1)
 
 {
@@ -1876,7 +5121,7 @@ void args_free(void **param_1)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 char * args_print(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                  undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                  byte **param_9,undefined8 param_10,undefined8 param_11,char *param_12,
@@ -2014,7 +5259,7 @@ LAB_00125d72:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 undefined8 args_has(byte **param_1,byte param_2)
 
 {
@@ -2041,7 +5286,7 @@ undefined8 args_has(byte **param_1,byte param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 void args_set(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
              undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
              byte **param_9,byte *param_10,char *param_11,ulong param_12,undefined8 param_13,
@@ -2098,7 +5343,7 @@ LAB_00125e79:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 byte ** args_parse(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                   undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                   char *param_9,int param_10,long param_11,ulong param_12,undefined8 param_13,
@@ -2144,7 +5389,7 @@ byte ** args_parse(undefined4 param_1,undefined4 param_2,undefined4 param_3,unde
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 undefined8 args_get(byte **param_1,byte param_2)
 
 {
@@ -2171,7 +5416,7 @@ undefined8 args_get(byte **param_1,byte param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/arguments.c#L892
+
 longlong args_strtonum(undefined8 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                       undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
                       byte **param_9,undefined *param_10,undefined *param_11,undefined *param_12,
@@ -2241,7 +5486,7 @@ LAB_0012602f:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/attributes.c#L56
+
 undefined *
 attributes_tostring(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                    undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8,
@@ -2282,7 +5527,7 @@ attributes_tostring(undefined4 param_1,undefined4 param_2,undefined4 param_3,und
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/attributes.c#L56
+
 uint attributes_fromstring(char *param_1)
 
 {
@@ -76798,7 +80043,7 @@ void msgbuf_drain(long **param_1,long param_2)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/imsg-buffer.c#L611
+
 undefined8 ibuf_write(long **param_1)
 
 {
@@ -76880,7 +80125,7 @@ LAB_0017465b:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/imsg-buffer.c#L611
+
 undefined8 msgbuf_write(long **param_1)
 
 {
@@ -76993,7 +80238,7 @@ LAB_0017482f:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/imsg-buffer.c#L611
+
 void msgbuf_clear(long **param_1)
 
 {
@@ -77011,7 +80256,7 @@ void msgbuf_clear(long **param_1)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/closefrom.c#L134 
+
 void closefrom(int param_1)
 
 {
@@ -77426,7 +80671,7 @@ LAB_00174e45:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/getopt.c#L53
+
 int BSDgetopt(int param_1,long param_2,char *param_3)
 
 {
@@ -77540,7 +80785,7 @@ LAB_0017524c:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/vis.c#L229
+
 undefined2 * vis(undefined2 *param_1,uint param_2,uint param_3,char param_4)
 
 {
@@ -77683,7 +80928,7 @@ LAB_00175572:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/vis.c#L229
+
 int strvis(undefined2 *param_1,char *param_2,uint param_3)
 
 {
@@ -77708,7 +80953,7 @@ int strvis(undefined2 *param_1,char *param_2,uint param_3)
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/vis.c#L229
+
 long strnvis(byte *param_1,byte *param_2,long param_3,uint param_4)
 
 {
@@ -77825,7 +81070,7 @@ LAB_00175996:
 }
 
 
-//https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/vis.c#L229
+
 int stravis(void **param_1,char *param_2,uint param_3)
 
 {
@@ -77856,7 +81101,7 @@ int stravis(void **param_1,char *param_2,uint param_3)
 }
 
 
-https://github.com/tmux/tmux/blob/fc204bb5e5e6ef4e48f6d6d2b087d2881ad9cf6e/compat/vis.c#L229
+
 int strvisx(undefined2 *param_1,char *param_2,ulong param_3,uint param_4)
 
 {
@@ -78306,4 +81551,4 @@ void _DT_FINI(void)
   return;
 }
 
-  
+
