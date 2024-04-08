@@ -2,11 +2,11 @@ import csv
 import glob
 import os
 
-directory = "./repos"
-
+directory = "data/repos"
+# check origin source
 link_files = glob.glob(f"{directory}/**/link_to_repo.txt", recursive=True)
 with open(
-    "./base.csv", "w", newline=""
+    "data/base.csv", "w", newline=""
 ) as new_file:
     writer = csv.writer(new_file)
     for link_file in link_files:
@@ -22,5 +22,5 @@ with open(
                 try:
                     f = f.read()
                     writer.writerow([other_file, link_content, f])
-                except:
-                    continue
+                except Exception as e:
+                    print(e)
